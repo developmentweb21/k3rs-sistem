@@ -760,7 +760,7 @@
 			.then(function (response) {
 				toast(response.message || "Laporan berhasil diselesaikan.");
 
-				loadVerificationDetail(id);
+				view("verifikasi");
 			})
 			.catch(function (error) {
 				console.error(error);
