@@ -1,5 +1,5 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 /*
 | -------------------------------------------------------------------------
@@ -65,5 +65,6 @@ $route['api/master/(:any)/delete/(:num)'] = 'master/hapus_data/$1/$2';
 $route['api/transaksi/(:any)'] = 'transaksi/simpan/$1';
 $route['api/laporan/data-awal'] = 'laporan/data_awal';
 $route['api/laporan/riwayat'] = 'laporan/riwayat';
+$route['api/laporan/verifikasi'] = 'laporan/verifikasi';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;

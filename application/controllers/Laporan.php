@@ -1,5 +1,5 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 class Laporan extends CI_Controller
 {
@@ -23,5 +23,30 @@ class Laporan extends CI_Controller
         if (!$user) return $this->json(array('message' => 'Sesi login tidak ditemukan.'), 401);
         return $this->json(array('laporan' => $this->Laporan_model->get_riwayat_insiden($user)));
     }
-    private function json($data, $status = 200) { return $this->output->set_status_header($status)->set_content_type('application/json')->set_output(json_encode($data)); }
+    private function json($data, $status = 200)
+    {
+        return $this->output->set_status_header($status)->set_content_type('application/json')->set_output(json_encode($data));
+    }
+    public function verifikasi()
+    {
+        $user = $this->session->userdata('k3rs_user');
+
+        if (!$user) {
+            return $this->json(
+                array('message' => 'Sesi login tidak ditemukan.'),
+                401
+            );
+        }
+
+        if ($user['role'] !== 'admin') {
+            return $this->json(
+                array('message' => 'Akses ditolak.'),
+                403
+            );
+        }
+
+        return $this->json(array(
+            'laporan' => $this->Laporan_model->get_laporan_verifikasi()
+        ));
+    }
 }

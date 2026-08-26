@@ -27,10 +27,15 @@
 		document.querySelectorAll("[data-view]").forEach(function (el) {
 			el.classList.toggle("hidden", el.dataset.view !== name);
 		});
+
 		document.querySelectorAll("[data-menu]").forEach(function (el) {
 			el.classList.toggle("bg-blue-800", el.dataset.menu === name);
 			el.classList.toggle("active", el.dataset.menu === name);
 		});
+
+		if (name === "verifikasi") {
+			loadVerification();
+		}
 	}
 	function render() {
 		document.getElementById("sidebar-user-name").textContent = data.user.nama;
@@ -229,6 +234,58 @@
 			})
 			.catch(function (error) {
 				toast(error.message);
+			});
+	}
+	function loadVerification() {
+		api("laporan/verifikasi", null, "GET")
+			.then(function (response) {
+				var rows = response.laporan || [];
+
+				document.getElementById("table-verifikasi").innerHTML =
+					rows
+						.map(function (report) {
+							return (
+								'<tr class="border-b">' +
+								'<td class="p-4">' +
+								escapeHtml(report.tanggal_kejadian) +
+								"</td>" +
+								"<td>" +
+								escapeHtml(report.pelapor) +
+								"</td>" +
+								"<td>" +
+								escapeHtml(report.kategori) +
+								"</td>" +
+								"<td>" +
+								escapeHtml(report.lokasi) +
+								"</td>" +
+								"<td>" +
+								'<span class="badge bg-blue-100 text-blue-700">' +
+								escapeHtml(report.status) +
+								"</span>" +
+								"</td>" +
+								'<td class="p-4 text-center">' +
+								'<button class="text-blue-600" ' +
+								'data-verify="' +
+								report.id +
+								'">' +
+								'<i class="fa-solid fa-eye"></i> Detail' +
+								"</button>" +
+								"</td>" +
+								"</tr>"
+							);
+						})
+						.join("") ||
+					"<tr>" +
+						'<td colspan="6" class="p-4 text-gray-500">' +
+						"Tidak ada laporan yang menunggu verifikasi." +
+						"</td>" +
+						"</tr>";
+			})
+			.catch(function (error) {
+				document.getElementById("table-verifikasi").innerHTML =
+					'<tr><td colspan="6" class="p-4 text-red-600">' +
+					escapeHtml(error.message) +
+					"</td></tr>";
 			});
 	}
 	function escapeHtml(value) {
