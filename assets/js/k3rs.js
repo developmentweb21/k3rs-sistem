@@ -1,0 +1,172 @@
+(function () {
+    'use strict';
+    var data = window.K3RS_DATA || {};
+    var employeeRows = [];
+    var menuRows = [];
+    var roleRows = [];
+    function options(items) { return '<option value="">-- Pilih --</option>' + items.map(function (item) { return '<option>' + item + '</option>'; }).join(''); }
+    function toast(message) { var el = document.createElement('div'); el.className = 'toast'; el.textContent = message; document.getElementById('toast-container').appendChild(el); setTimeout(function () { el.remove(); }, 3000); }
+    function view(name) { document.querySelectorAll('[data-view]').forEach(function (el) { el.classList.toggle('hidden', el.dataset.view !== name); }); document.querySelectorAll('[data-menu]').forEach(function (el) { el.classList.toggle('bg-blue-800', el.dataset.menu === name); el.classList.toggle('active', el.dataset.menu === name); }); }
+    function render() {
+        document.getElementById('sidebar-user-name').textContent = data.user.nama;
+        document.getElementById('sidebar-user-role').textContent = data.user.role === 'admin' ? 'Administrator' : 'Petugas Unit';
+        loadNavigation();
+        document.getElementById('lap-kategori').innerHTML = options(data.kategori);
+        document.getElementById('check-unit').innerHTML = options(data.unit);
+        document.getElementById('pegawai-unit').innerHTML = options(data.unit);
+        document.getElementById('lap-sehat-unit').value = data.user.unit;
+        document.getElementById('lap-sehat-nama').innerHTML = options([data.user.nama, 'Siti Aminah', 'Budi Santoso']);
+        document.getElementById('checklist-items').innerHTML = data.checklist.map(function (item, index) { return '<label class="flex gap-2 mb-2 text-sm"><input type="checkbox" name="check-' + index + '">' + item + '</label>'; }).join('');
+        if (data.user.role === 'admin') {
+            loadMasterData();
+            loadEmployees();
+            loadRoles();
+        }
+        document.getElementById('kpi-total').textContent = data.kpi.total;
+        document.getElementById('kpi-near-miss').textContent = data.kpi.near_miss;
+        document.getElementById('kpi-b3').textContent = data.kpi.b3;
+        document.getElementById('kpi-kepatuhan').textContent = data.kpi.kepatuhan + '%';
+        document.querySelectorAll('[data-menu]').forEach(function (el) { el.addEventListener('click', function () { view(el.dataset.menu); }); });
+        new Chart(document.getElementById('chart-insiden'), {type:'bar',data:{labels:['Mar','Apr','Mei','Jun','Jul','Agu'],datasets:[{label:'Insiden',data:[2,4,1,5,2,3],backgroundColor:'#3b82f6',borderRadius:4}]}});
+        new Chart(document.getElementById('chart-kategori'), {type:'doughnut',data:{labels:['Near Miss','Accident Man','Laka Lantas','B3'],datasets:[{data:[4,3,2,1],backgroundColor:['#3b82f6','#f59e0b','#ef4444','#10b981']}]}});
+    }
+    function api(path, payload, method) {
+        method = method || 'POST';
+        var request = {method: method, headers: {'Content-Type': 'application/json'}};
+        if (method !== 'GET') request.body = JSON.stringify(payload || {});
+        return fetch(window.K3RS_API_URL + path, request).then(function (response) { return response.json().then(function (body) { if (!response.ok) throw new Error(body.message || 'Terjadi kesalahan server.'); return body; }); });
+    }
+    function bindNavigation() { document.querySelectorAll('[data-menu]').forEach(function (el) { el.addEventListener('click', function () { view(el.dataset.menu); }); }); }
+    function loadNavigation() {
+        api('master/menu/navigasi', null, 'GET').then(function (response) {
+            document.getElementById('nav-menu').innerHTML = response.menus.map(function (menu) { return '<button data-menu="' + menu.slug + '" class="menu-button w-full text-left px-3 py-2 rounded hover:bg-blue-800"><i class="fa-solid ' + escapeHtml(menu.icon) + ' w-6"></i>' + escapeHtml(menu.nama) + '</button>'; }).join('');
+            document.getElementById('bottom-nav').innerHTML = response.menus.map(function (menu) { return '<button data-menu="' + menu.slug + '" class="bottom-menu"><i class="fa-solid ' + escapeHtml(menu.icon) + '"></i>' + escapeHtml(menu.nama) + '</button>'; }).join('');
+            bindNavigation();
+        }).catch(function (error) { toast(error.message); });
+    }
+    function escapeHtml(value) { return String(value || '').replace(/[&<>"']/g, function (char) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char]; }); }
+    function loadEmployees() {
+        api('master/users', null, 'GET').then(function (response) {
+            employeeRows = response.users;
+            document.getElementById('table-pegawai').innerHTML = employeeRows.map(function (user) {
+                return '<tr class="border-b"><td class="p-4">' + escapeHtml(user.username) + '</td><td>' + escapeHtml(user.nama_lengkap) + '</td><td>' + escapeHtml(user.unit_kerja) + '</td><td><span class="badge">' + (user.role === 'admin' ? 'Administrator' : 'Petugas Unit') + '</span></td><td class="p-4 text-center whitespace-nowrap"><button class="text-blue-600 mr-3" data-edit-pegawai="' + user.id + '"><i class="fa-solid fa-pen"></i> Edit</button><button class="text-red-600" data-delete-pegawai="' + user.id + '"><i class="fa-solid fa-trash"></i> Hapus</button></td></tr>';
+            }).join('') || '<tr><td class="p-4" colspan="5">Belum ada data pegawai.</td></tr>';
+            document.querySelectorAll('[data-edit-pegawai]').forEach(function (button) { button.addEventListener('click', function () { editEmployee(button.dataset.editPegawai); }); });
+            document.querySelectorAll('[data-delete-pegawai]').forEach(function (button) { button.addEventListener('click', function () { deleteEmployee(button.dataset.deletePegawai); }); });
+        }).catch(function (error) { document.getElementById('table-pegawai').innerHTML = '<tr><td class="p-4 text-red-600" colspan="5">' + escapeHtml(error.message) + '</td></tr>'; });
+    }
+    function loadRoles() {
+        api('master/roles', null, 'GET').then(function (response) {
+            roleRows = response.roles;
+            document.getElementById('pegawai-role').innerHTML = roleRows.map(function (role) { return '<option value="' + escapeHtml(role.kode) + '">' + escapeHtml(role.nama) + '</option>'; }).join('');
+            var roleInput = document.querySelector('.menu-role-choice') || document.getElementById('menu-role-admin');
+            var roleBox = roleInput.parentElement.parentElement;
+            roleBox.innerHTML = '<p class="font-semibold text-sm mb-2">Tampilkan untuk peran:</p>' + roleRows.map(function (role) { return '<label class="mr-5"><input class="menu-role-choice" data-menu-role="' + escapeHtml(role.kode) + '" type="checkbox"> ' + escapeHtml(role.nama) + '</label>'; }).join('') + '<label class="ml-5"><input id="menu-active" type="checkbox" checked> Aktif</label>';
+            document.getElementById('table-role').innerHTML = roleRows.map(function (role) { return '<tr class="border-b"><td class="p-4">' + escapeHtml(role.nama) + '</td><td>' + escapeHtml(role.kode) + '</td><td class="p-4 text-center"><button class="text-blue-600 mr-3" data-edit-role="' + role.id + '"><i class="fa-solid fa-pen"></i> Edit</button><button class="text-red-600" data-delete-role="' + role.id + '"><i class="fa-solid fa-trash"></i> Hapus</button></td></tr>'; }).join('');
+            document.querySelectorAll('[data-edit-role]').forEach(function (button) { button.addEventListener('click', function () { showRoleForm(roleRows.filter(function (role) { return String(role.id) === button.dataset.editRole; })[0]); }); });
+            document.querySelectorAll('[data-delete-role]').forEach(function (button) { button.addEventListener('click', function () { deleteRole(button.dataset.deleteRole); }); });
+        }).catch(function (error) { toast(error.message); });
+    }
+    function loadIncidentHistory() {
+        api('laporan/riwayat', null, 'GET').then(function (response) {
+            document.getElementById('table-riwayat-insiden').innerHTML = response.laporan.map(function (report) {
+                var statusClass = report.status === 'selesai' ? 'bg-green-100 text-green-700' : (report.status === 'diproses' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700');
+                return '<tr class="border-b"><td class="p-4">' + escapeHtml(report.tanggal_kejadian) + '</td><td>' + escapeHtml(report.kategori) + '</td><td>' + escapeHtml(report.lokasi) + '</td><td>' + escapeHtml(report.pelapor) + '</td><td class="p-4"><span class="badge ' + statusClass + '">' + escapeHtml(report.status) + '</span></td></tr>';
+            }).join('') || '<tr><td class="p-4 text-gray-500" colspan="5">Belum ada laporan insiden.</td></tr>';
+        }).catch(function (error) { document.getElementById('table-riwayat-insiden').innerHTML = '<tr><td class="p-4 text-red-600" colspan="5">' + escapeHtml(error.message) + '</td></tr>'; });
+    }
+    function showEmployeeForm(user) {
+        document.getElementById('pegawai-form').reset();
+        document.getElementById('pegawai-id').value = user ? user.id : '';
+        document.getElementById('pegawai-username').value = user ? user.username : '';
+        document.getElementById('pegawai-nama').value = user ? user.nama_lengkap : '';
+        document.getElementById('pegawai-unit').value = user ? user.unit_kerja : '';
+        document.getElementById('pegawai-role').value = user ? user.role : 'user';
+        document.getElementById('pegawai-form-title').textContent = user ? 'Ubah Pegawai' : 'Tambah Pegawai';
+        document.getElementById('pegawai-form-wrapper').classList.remove('hidden');
+    }
+    function editEmployee(id) { showEmployeeForm(employeeRows.filter(function (user) { return String(user.id) === String(id); })[0]); }
+    function deleteEmployee(id) {
+        if (!window.confirm('Hapus pegawai ini?')) return;
+        api('master/users/delete/' + id).then(function (response) { toast(response.message); loadEmployees(); }).catch(function (error) { toast(error.message); });
+    }
+    function setupEmployeeCrud() {
+        document.getElementById('btn-tambah-pegawai').addEventListener('click', function () { showEmployeeForm(null); });
+        document.getElementById('btn-batal-pegawai').addEventListener('click', function () { document.getElementById('pegawai-form-wrapper').classList.add('hidden'); });
+        document.getElementById('pegawai-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            api('master/users', {id: document.getElementById('pegawai-id').value, username: document.getElementById('pegawai-username').value, nama_lengkap: document.getElementById('pegawai-nama').value, unit_kerja: document.getElementById('pegawai-unit').value, role: document.getElementById('pegawai-role').value, password: document.getElementById('pegawai-password').value}).then(function (response) {
+                toast(response.message); document.getElementById('pegawai-form-wrapper').classList.add('hidden'); loadEmployees();
+            }).catch(function (error) { toast(error.message); });
+        });
+    }
+    function masterList(jenis, elementId, icon) {
+        api('master/' + jenis, null, 'GET').then(function (response) {
+            document.getElementById(elementId).innerHTML = response.data.map(function (item) {
+                return '<li class="flex items-center justify-between gap-2 border-b pb-2"><span><i class="fa-solid ' + icon + ' text-blue-500 mr-2"></i>' + escapeHtml(item.nama) + '</span><span class="whitespace-nowrap"><button class="text-blue-600 mr-2" data-edit-master="' + jenis + ':' + item.id + '"><i class="fa-solid fa-pen"></i></button><button class="text-red-600" data-delete-master="' + jenis + ':' + item.id + '"><i class="fa-solid fa-trash"></i></button></span></li>';
+            }).join('') || '<li class="text-gray-500">Belum ada data.</li>';
+            response.data.forEach(function (item) { document.querySelector('[data-edit-master="' + jenis + ':' + item.id + '"]').addEventListener('click', function () { showMasterForm(jenis, item); }); document.querySelector('[data-delete-master="' + jenis + ':' + item.id + '"]').addEventListener('click', function () { deleteMaster(jenis, item.id); }); });
+        }).catch(function (error) { document.getElementById(elementId).innerHTML = '<li class="text-red-600">' + escapeHtml(error.message) + '</li>'; });
+    }
+    function loadMasterData() { masterList('kategori', 'master-kategori', 'fa-tag'); masterList('unit', 'master-unit', 'fa-building'); masterList('checklist', 'master-checklist', 'fa-check'); }
+    function showMasterForm(jenis, item) {
+        document.getElementById('master-form').reset(); document.getElementById('master-id').value = item ? item.id : ''; document.getElementById('master-jenis').value = jenis; document.getElementById('master-nama').value = item ? item.nama : ''; document.getElementById('master-form-title').textContent = item ? 'Ubah Data Master' : 'Tambah Data Master'; document.getElementById('master-form-wrapper').classList.remove('hidden');
+    }
+    function deleteMaster(jenis, id) { if (!window.confirm('Hapus data master ini?')) return; api('master/' + jenis + '/delete/' + id).then(function (response) { toast(response.message); loadMasterData(); }).catch(function (error) { toast(error.message); }); }
+    function setupMasterCrud() {
+        document.querySelectorAll('[data-tambah-master]').forEach(function (button) { button.addEventListener('click', function () { showMasterForm(button.dataset.tambahMaster); }); });
+        document.getElementById('btn-batal-master').addEventListener('click', function () { document.getElementById('master-form-wrapper').classList.add('hidden'); });
+        document.getElementById('master-form').addEventListener('submit', function (event) { event.preventDefault(); var jenis = document.getElementById('master-jenis').value; api('master/' + jenis, {id: document.getElementById('master-id').value, nama: document.getElementById('master-nama').value}).then(function (response) { toast(response.message); document.getElementById('master-form-wrapper').classList.add('hidden'); loadMasterData(); }).catch(function (error) { toast(error.message); }); });
+    }
+    function loadMenuManagement() {
+        if (data.user.role !== 'admin') return;
+        api('master/menu', null, 'GET').then(function (response) {
+            menuRows = response.menus;
+            document.getElementById('table-menu').innerHTML = menuRows.map(function (menu) { return '<tr class="border-b"><td class="p-4">' + menu.urutan + '</td><td><i class="fa-solid ' + escapeHtml(menu.icon) + ' mr-2"></i>' + escapeHtml(menu.nama) + '</td><td>' + escapeHtml(menu.slug) + '</td><td>' + menu.roles.map(function (role) { return role === 'admin' ? 'Admin' : 'Petugas'; }).join(', ') + '</td><td>' + (Number(menu.is_active) ? '<span class="badge">Aktif</span>' : '<span class="text-gray-500">Nonaktif</span>') + '</td><td class="p-4 text-center"><button class="text-blue-600 mr-3" data-edit-menu="' + menu.id + '"><i class="fa-solid fa-pen"></i> Edit</button><button class="text-red-600" data-delete-menu="' + menu.id + '"><i class="fa-solid fa-trash"></i> Hapus</button></td></tr>'; }).join('') || '<tr><td class="p-4" colspan="6">Belum ada menu.</td></tr>';
+            document.querySelectorAll('[data-edit-menu]').forEach(function (button) { button.addEventListener('click', function () { showMenuForm(menuRows.filter(function (menu) { return String(menu.id) === button.dataset.editMenu; })[0]); }); });
+            document.querySelectorAll('[data-delete-menu]').forEach(function (button) { button.addEventListener('click', function () { deleteMenu(button.dataset.deleteMenu); }); });
+        }).catch(function (error) { toast(error.message); });
+    }
+    function showMenuForm(menu) {
+        document.getElementById('menu-form').reset(); document.getElementById('menu-id').value = menu ? menu.id : ''; document.getElementById('menu-nama').value = menu ? menu.nama : ''; document.getElementById('menu-slug').value = menu ? menu.slug : ''; setMenuIcon(menu ? menu.icon : 'fa-circle'); document.getElementById('icon-picker').classList.add('hidden'); document.getElementById('menu-urutan').value = menu ? menu.urutan : 0; document.querySelectorAll('[data-menu-role]').forEach(function (input) { input.checked = menu ? menu.roles.indexOf(input.dataset.menuRole) !== -1 : false; }); document.getElementById('menu-active').checked = menu ? Number(menu.is_active) === 1 : true; document.getElementById('menu-form-title').textContent = menu ? 'Ubah Menu' : 'Tambah Menu'; document.getElementById('menu-form-wrapper').classList.remove('hidden');
+    }
+    function setMenuIcon(icon) { document.getElementById('menu-icon').value = icon; document.getElementById('menu-icon-preview').className = 'fa-solid ' + icon; document.querySelectorAll('.icon-choice').forEach(function (button) { button.classList.toggle('selected', button.dataset.icon === icon); }); }
+    function deleteMenu(id) { if (!window.confirm('Hapus menu ini?')) return; api('master/menu/delete/' + id).then(function (response) { toast(response.message); loadMenuManagement(); loadNavigation(); }).catch(function (error) { toast(error.message); }); }
+    function setupMenuCrud() {
+        document.getElementById('btn-tambah-menu').addEventListener('click', function () { showMenuForm(null); });
+        document.getElementById('btn-batal-menu').addEventListener('click', function () { document.getElementById('menu-form-wrapper').classList.add('hidden'); });
+        document.getElementById('btn-pilih-icon').addEventListener('click', function () { document.getElementById('icon-picker').classList.toggle('hidden'); });
+        document.querySelectorAll('.icon-choice').forEach(function (button) { button.addEventListener('click', function () { setMenuIcon(button.dataset.icon); document.getElementById('icon-picker').classList.add('hidden'); }); });
+        document.getElementById('menu-form').addEventListener('submit', function (event) { event.preventDefault(); var roles = Array.prototype.slice.call(document.querySelectorAll('[data-menu-role]:checked')).map(function (input) { return input.dataset.menuRole; }); api('master/menu', {id: document.getElementById('menu-id').value, nama: document.getElementById('menu-nama').value, slug: document.getElementById('menu-slug').value, icon: document.getElementById('menu-icon').value, urutan: document.getElementById('menu-urutan').value, roles: roles, is_active: document.getElementById('menu-active').checked}).then(function (response) { toast(response.message); document.getElementById('menu-form-wrapper').classList.add('hidden'); loadMenuManagement(); loadNavigation(); }).catch(function (error) { toast(error.message); }); });
+    }
+    function showRoleForm(role) { document.getElementById('role-form').reset(); document.getElementById('role-id').value = role ? role.id : ''; document.getElementById('role-nama').value = role ? role.nama : ''; document.getElementById('role-kode').value = role ? role.kode : ''; document.getElementById('role-form-title').textContent = role ? 'Ubah Peran' : 'Tambah Peran'; document.getElementById('role-form-wrapper').classList.remove('hidden'); }
+    function deleteRole(id) { if (!window.confirm('Hapus peran ini?')) return; api('master/roles/delete/' + id).then(function (response) { toast(response.message); loadRoles(); }).catch(function (error) { toast(error.message); }); }
+    function setupRoleCrud() { document.getElementById('btn-tambah-role').addEventListener('click', function () { showRoleForm(null); }); document.getElementById('btn-batal-role').addEventListener('click', function () { document.getElementById('role-form-wrapper').classList.add('hidden'); }); document.getElementById('role-form').addEventListener('submit', function (event) { event.preventDefault(); api('master/roles', {id: document.getElementById('role-id').value, nama: document.getElementById('role-nama').value, kode: document.getElementById('role-kode').value}).then(function (response) { toast(response.message); document.getElementById('role-form-wrapper').classList.add('hidden'); loadRoles(); }).catch(function (error) { toast(error.message); }); }); }
+    var loginForm = document.getElementById('login-form');
+    if (loginForm) {
+        loginForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            api('login', {username: document.getElementById('login-id').value, password: document.getElementById('login-pass').value}).then(function () {
+                window.location.assign(window.K3RS_HOME_URL);
+            }).catch(function (error) { toast(error.message); });
+        });
+        document.getElementById('show-pass').addEventListener('change', function (event) { document.getElementById('login-pass').type = event.target.checked ? 'text' : 'password'; });
+        return;
+    }
+    setupEmployeeCrud();
+    setupMasterCrud();
+    setupMenuCrud();
+    setupRoleCrud();
+    render();
+    loadMenuManagement();
+    loadIncidentHistory();
+    view('dashboard');
+    document.getElementById('logout').addEventListener('click', function () { api('logout').finally(function () { window.location.assign(window.K3RS_HOME_URL.replace('dashboard', 'login')); }); });
+    document.querySelectorAll('.report-form').forEach(function (form) { form.addEventListener('submit', function (event) {
+        event.preventDefault(); var fields = form.querySelectorAll('input, select, textarea'), payload;
+        if (form.dataset.type === 'insiden') payload = {kategori: fields[0].value, tanggal: fields[1].value, lokasi: fields[2].value, kronologi: fields[3].value, tindakan: fields[4].value};
+        if (form.dataset.type === 'kesehatan') payload = {nama: fields[1].value, diagnosa: fields[2].value, hari: fields[3].value};
+        if (form.dataset.type === 'checklist') payload = {periode: fields[0].value, tanggal: fields[1].value, unit: fields[2].value, items: Array.prototype.slice.call(fields, 3).filter(function (item) { return item.checked; }).map(function (item) { return item.name; })};
+        api('transaksi/' + form.dataset.type, payload).then(function (response) { toast(response.message); form.reset(); document.getElementById('lap-sehat-unit').value = data.user.unit; if (form.dataset.type === 'insiden') loadIncidentHistory(); }).catch(function (error) { toast(error.message); });
+    }); });
+}());

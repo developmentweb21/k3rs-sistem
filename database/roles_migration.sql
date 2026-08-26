@@ -1,0 +1,9 @@
+USE k3rs;
+CREATE TABLE IF NOT EXISTS roles (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  nama VARCHAR(100) NOT NULL,
+  kode VARCHAR(50) NOT NULL UNIQUE
+);
+INSERT IGNORE INTO roles (id,nama,kode) VALUES (1,'Administrator','admin'),(2,'Petugas Unit','user');
+ALTER TABLE users MODIFY role VARCHAR(50) NOT NULL DEFAULT 'user';
+ALTER TABLE menu_roles MODIFY role VARCHAR(50) NOT NULL;
