@@ -292,21 +292,15 @@
 			});
 	}
 	function loadVerificationDetail(id) {
-		api("laporan/verifikasi/detail/" + id, null, "GET")
+		api("laporan/detail_verifikasi/" + id, null, "GET")
 			.then(function (response) {
 				var report = response.laporan;
 
-				document.getElementById("detail-verifikasi-nomor").textContent =
-					report.nomor_laporan || "-";
+				document.getElementById("detail-verifikasi-id").textContent =
+					report.id || "-";
 
 				document.getElementById("detail-verifikasi-tanggal").textContent =
 					report.tanggal_kejadian || "-";
-
-				document.getElementById("detail-verifikasi-pelapor").textContent =
-					report.pelapor || "-";
-
-				document.getElementById("detail-verifikasi-unit").textContent =
-					report.unit || "-";
 
 				document.getElementById("detail-verifikasi-kategori").textContent =
 					report.kategori || "-";
@@ -314,17 +308,27 @@
 				document.getElementById("detail-verifikasi-lokasi").textContent =
 					report.lokasi || "-";
 
+				document.getElementById("detail-verifikasi-created").textContent =
+					report.created_at || "-";
+
+				document.getElementById("detail-verifikasi-pelapor").textContent =
+					report.pelapor || "-";
+
 				document.getElementById("detail-verifikasi-kronologi").textContent =
 					report.kronologi || "-";
 
-				var statusElement = document.getElementById("detail-verifikasi-status");
+				document.getElementById("detail-verifikasi-tindakan").textContent =
+					report.tindakan_awal || "-";
 
-				statusElement.textContent = report.status || "-";
+				document.getElementById("detail-verifikasi-status").textContent =
+					report.status || "-";
 
+				// Tampilkan halaman detail setelah semua data berhasil diisi
 				view("detail-verifikasi");
 			})
 			.catch(function (error) {
-				toast(error.message);
+				console.error("Gagal memuat detail laporan:", error);
+				toast(error.message || "Gagal memuat detail laporan.");
 			});
 	}
 	/* EVENT TOMBOL KEMBALI */
