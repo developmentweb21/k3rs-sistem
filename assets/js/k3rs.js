@@ -264,8 +264,7 @@
 								"</span>" +
 								"</td>" +
 								'<td class="p-4 text-center">' +
-								'<button class="text-blue-600" ' +
-								'data-verify="' +
+								'<button class="text-blue-600" data-verify="' +
 								report.id +
 								'">' +
 								'<i class="fa-solid fa-eye"></i> Detail' +
@@ -275,11 +274,15 @@
 							);
 						})
 						.join("") ||
-					"<tr>" +
-						'<td colspan="6" class="p-4 text-gray-500">' +
-						"Tidak ada laporan yang menunggu verifikasi." +
-						"</td>" +
-						"</tr>";
+					'<tr><td colspan="6" class="p-4 text-gray-500">' +
+						"Tidak ada laporan yang menunggu verifikasi.</td></tr>";
+
+				// Event tombol Detail
+				document.querySelectorAll("[data-verify]").forEach(function (button) {
+					button.addEventListener("click", function () {
+						loadVerificationDetail(this.dataset.verify);
+					});
+				});
 			})
 			.catch(function (error) {
 				document.getElementById("table-verifikasi").innerHTML =
@@ -287,6 +290,50 @@
 					escapeHtml(error.message) +
 					"</td></tr>";
 			});
+	}
+	function loadVerificationDetail(id) {
+		api("laporan/verifikasi/detail/" + id, null, "GET")
+			.then(function (response) {
+				var report = response.laporan;
+
+				document.getElementById("detail-verifikasi-nomor").textContent =
+					report.nomor_laporan || "-";
+
+				document.getElementById("detail-verifikasi-tanggal").textContent =
+					report.tanggal_kejadian || "-";
+
+				document.getElementById("detail-verifikasi-pelapor").textContent =
+					report.pelapor || "-";
+
+				document.getElementById("detail-verifikasi-unit").textContent =
+					report.unit || "-";
+
+				document.getElementById("detail-verifikasi-kategori").textContent =
+					report.kategori || "-";
+
+				document.getElementById("detail-verifikasi-lokasi").textContent =
+					report.lokasi || "-";
+
+				document.getElementById("detail-verifikasi-kronologi").textContent =
+					report.kronologi || "-";
+
+				var statusElement = document.getElementById("detail-verifikasi-status");
+
+				statusElement.textContent = report.status || "-";
+
+				view("detail-verifikasi");
+			})
+			.catch(function (error) {
+				toast(error.message);
+			});
+	}
+	/* EVENT TOMBOL KEMBALI */
+	var btnKembaliVerifikasi = document.getElementById("btn-kembali-verifikasi");
+
+	if (btnKembaliVerifikasi) {
+		btnKembaliVerifikasi.addEventListener("click", function () {
+			view("verifikasi");
+		});
 	}
 	function escapeHtml(value) {
 		return String(value || "").replace(/[&<>"']/g, function (char) {

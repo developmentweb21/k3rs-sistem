@@ -50,4 +50,24 @@ class Laporan_model extends CI_Model
             ->get()
             ->result_array();
     }
+    public function get_detail_laporan_verifikasi($id)
+    {
+        return $this->db
+            ->select('
+            laporan_insiden.id,
+            laporan_insiden.tanggal_kejadian,
+            laporan_insiden.kategori,
+            laporan_insiden.lokasi,
+            laporan_insiden.kronologi,
+            laporan_insiden.tindakan_awal,
+            laporan_insiden.status,
+            laporan_insiden.created_at,
+            users.nama_lengkap AS pelapor
+        ')
+            ->from('laporan_insiden')
+            ->join('users', 'users.id = laporan_insiden.user_id')
+            ->where('laporan_insiden.id', $id)
+            ->get()
+            ->row_array();
+    }
 }

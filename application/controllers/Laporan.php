@@ -49,4 +49,43 @@ class Laporan extends CI_Controller
             'laporan' => $this->Laporan_model->get_laporan_verifikasi()
         ));
     }
+    public function detail_verifikasi($id = null)
+    {
+        $user = $this->session->userdata('k3rs_user');
+
+        if (!$user) {
+            return $this->json(
+                array('message' => 'Sesi login tidak ditemukan.'),
+                401
+            );
+        }
+
+        if ($user['role'] !== 'admin') {
+            return $this->json(
+                array('message' => 'Akses ditolak.'),
+                403
+            );
+        }
+
+        if (!$id) {
+            return $this->json(
+                array('message' => 'ID laporan tidak ditemukan.'),
+                400
+            );
+        }
+
+        $laporan = $this->Laporan_model
+            ->get_detail_laporan_verifikasi($id);
+
+        if (!$laporan) {
+            return $this->json(
+                array('message' => 'Data laporan tidak ditemukan.'),
+                404
+            );
+        }
+
+        return $this->json(array(
+            'laporan' => $laporan
+        ));
+    }
 }

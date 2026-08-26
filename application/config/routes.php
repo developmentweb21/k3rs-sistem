@@ -66,5 +66,6 @@ $route['api/transaksi/(:any)'] = 'transaksi/simpan/$1';
 $route['api/laporan/data-awal'] = 'laporan/data_awal';
 $route['api/laporan/riwayat'] = 'laporan/riwayat';
 $route['api/laporan/verifikasi'] = 'laporan/verifikasi';
+$route['api/laporan/detail_verifikasi/(:num)'] = 'laporan/detail_verifikasi/$1';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
