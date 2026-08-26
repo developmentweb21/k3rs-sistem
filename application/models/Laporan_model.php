@@ -93,4 +93,50 @@ class Laporan_model extends CI_Model
 
         return $this->db->affected_rows() > 0;
     }
+    public function update_status_laporan(
+        $id,
+        $status_lama,
+        $status_baru
+    ) {
+        $this->db
+            ->where('id', $id)
+            ->where('status', $status_lama)
+            ->update(
+                'laporan_insiden',
+                array(
+                    'status' => $status_baru
+                )
+            );
+
+        return $this->db->affected_rows() > 0;
+    }
+    public function simpan_tindak_lanjut($data)
+    {
+        return $this->db
+            ->insert('laporan_tindak_lanjut', $data);
+    }
+
+    public function get_tindak_lanjut_laporan($laporan_id)
+    {
+        return $this->db
+            ->select('
+            laporan_tindak_lanjut.*,
+            users.nama_lengkap AS verifikator
+        ')
+            ->from('laporan_tindak_lanjut')
+            ->join(
+                'users',
+                'users.id = laporan_tindak_lanjut.verifikator_id'
+            )
+            ->where(
+                'laporan_tindak_lanjut.laporan_id',
+                $laporan_id
+            )
+            ->order_by(
+                'laporan_tindak_lanjut.created_at',
+                'DESC'
+            )
+            ->get()
+            ->result_array();
+    }
 }

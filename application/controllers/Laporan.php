@@ -142,30 +142,196 @@ class Laporan extends CI_Controller
             );
         }
 
-        if ($laporan['status'] !== 'menunggu') {
+        $status_lama = $laporan['status'];
+
+        /*
+    |--------------------------------------------------------------------------
+    | STATUS MENUNGGU
+    |--------------------------------------------------------------------------
+    | Wajib mengisi tindak lanjut.
+    | Foto bersifat opsional.
+    */
+
+        if ($status_lama === 'menunggu') {
+
+            $keterangan = trim(
+                $this->input->post('keterangan', true)
+            );
+
+            if (empty($keterangan)) {
+                return $this->json(
+                    array(
+                        'message' =>
+                        'Keterangan atau tindakan lanjutan wajib diisi.'
+                    ),
+                    400
+                );
+            }
+
+            /*
+        |--------------------------------------------------------------------------
+        | Upload Foto (Opsional)
+        |--------------------------------------------------------------------------
+        */
+
+            $foto = null;
+
+            if (
+                isset($_FILES['foto']) &&
+                !empty($_FILES['foto']['name'])
+            ) {
+
+                $config['upload_path'] =
+                    FCPATH . 'uploads/verifikasi/';
+
+                $config['allowed_types'] =
+                    'jpg|jpeg|png';
+
+                $config['max_size'] = 5120; // 5 MB
+
+                $config['encrypt_name'] = TRUE;
+
+                $this->load->library(
+                    'upload',
+                    $config
+                );
+
+                if (
+                    !$this->upload->do_upload('foto')
+                ) {
+
+                    return $this->json(
+                        array(
+                            'message' =>
+                            strip_tags(
+                                $this->upload->display_errors()
+                            )
+                        ),
+                        400
+                    );
+                }
+
+                $upload_data =
+                    $this->upload->data();
+
+                $foto =
+                    'uploads/verifikasi/' .
+                    $upload_data['file_name'];
+            }
+
+            /*
+        |--------------------------------------------------------------------------
+        | Simpan dengan Transaction
+        |--------------------------------------------------------------------------
+        */
+
+            $this->db->trans_begin();
+
+            // Simpan catatan tindak lanjut
+            $result_tindak_lanjut =
+                $this->Laporan_model->simpan_tindak_lanjut(
+                    array(
+                        'laporan_id' => $id,
+                        'verifikator_id' => $user['id'],
+                        'keterangan' => $keterangan,
+                        'foto' => $foto
+                    )
+                );
+
+            // Update status
+            $result_status =
+                $this->Laporan_model->update_status_laporan(
+                    $id,
+                    'menunggu',
+                    'diproses'
+                );
+
+            if (
+                !$result_tindak_lanjut ||
+                !$result_status
+            ) {
+
+                $this->db->trans_rollback();
+
+                // Hapus foto jika proses database gagal
+                if (
+                    $foto &&
+                    file_exists(
+                        FCPATH . $foto
+                    )
+                ) {
+                    unlink(
+                        FCPATH . $foto
+                    );
+                }
+
+                return $this->json(
+                    array(
+                        'message' =>
+                        'Gagal menyimpan proses verifikasi.'
+                    ),
+                    500
+                );
+            }
+
+            $this->db->trans_commit();
+
             return $this->json(
                 array(
-                    'message' => 'Laporan ini sudah tidak dalam status menunggu.'
-                ),
-                400
+                    'message' =>
+                    'Verifikasi berhasil disimpan. Laporan sekarang sedang diproses.',
+                    'status' => 'diproses'
+                )
             );
         }
 
-        $result = $this->Laporan_model
-            ->verifikasi_laporan($id);
+        /*
+    |--------------------------------------------------------------------------
+    | STATUS DIPROSES
+    |--------------------------------------------------------------------------
+    | Selesaikan laporan.
+    */
 
-        if (!$result) {
+        if ($status_lama === 'diproses') {
+
+            $result =
+                $this->Laporan_model->update_status_laporan(
+                    $id,
+                    'diproses',
+                    'selesai'
+                );
+
+            if (!$result) {
+                return $this->json(
+                    array(
+                        'message' =>
+                        'Gagal menyelesaikan laporan.'
+                    ),
+                    500
+                );
+            }
+
             return $this->json(
                 array(
-                    'message' => 'Status laporan gagal diperbarui.'
-                ),
-                500
+                    'message' =>
+                    'Laporan berhasil diselesaikan.',
+                    'status' => 'selesai'
+                )
             );
         }
 
-        return $this->json(array(
-            'message' => 'Laporan berhasil diverifikasi dan sedang diproses.',
-            'status'  => 'diproses'
-        ));
+        /*
+    |--------------------------------------------------------------------------
+    | STATUS SELESAI
+    |--------------------------------------------------------------------------
+    */
+
+        return $this->json(
+            array(
+                'message' =>
+                'Laporan ini sudah selesai dan tidak dapat diproses kembali.'
+            ),
+            400
+        );
     }
 }

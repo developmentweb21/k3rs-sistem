@@ -234,8 +234,10 @@
                     Status Laporan
                 </h3>
 
-                <p class="text-sm text-gray-500 mb-3">
-                    Laporan ini saat ini menunggu proses verifikasi.
+                <p
+                    id="detail-verifikasi-status-info"
+                    class="text-sm text-gray-500 mb-3">
+                    -
                 </p>
 
                 <div class="border-t pt-4 text-sm">
@@ -253,9 +255,10 @@
                     Proses Verifikasi
                 </h3>
 
-                <p class="text-sm text-gray-500 mb-4">
-                    Setelah laporan diverifikasi, status akan berubah menjadi
-                    <strong>diproses</strong>.
+                <p
+                    id="detail-verifikasi-action-info"
+                    class="text-sm text-gray-500 mb-4">
+                    -
                 </p>
 
                 <button
@@ -273,6 +276,74 @@
 
         </div>
 
+    </div>
+    <!-- FORM TINDAK LANJUT VERIFIKASI -->
+    <div
+        id="form-tindak-lanjut"
+        class="glass rounded-xl p-6 mt-4 hidden">
+        <h3 class="font-bold text-lg mb-4">
+            <i class="fa-solid fa-clipboard-check text-blue-600 mr-2"></i>
+            Form Tindak Lanjut Verifikasi
+        </h3>
+
+        <!-- KETERANGAN -->
+        <div class="mb-4">
+            <label
+                for="tindak-lanjut-keterangan"
+                class="block text-sm font-medium text-gray-700 mb-2">
+                Keterangan / Tindakan Lanjutan
+                <span class="text-red-500">*</span>
+            </label>
+
+            <textarea
+                id="tindak-lanjut-keterangan"
+                rows="5"
+                class="w-full border border-gray-300 rounded-lg p-3
+                   focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Tuliskan hasil verifikasi atau tindakan lanjutan yang dilakukan..."></textarea>
+        </div>
+
+        <!-- FOTO -->
+        <div class="mb-5">
+            <label
+                for="tindak-lanjut-foto"
+                class="block text-sm font-medium text-gray-700 mb-2">
+                Foto Dokumentasi
+                <span class="text-gray-400">(Opsional)</span>
+            </label>
+
+            <input
+                type="file"
+                id="tindak-lanjut-foto"
+                accept="image/*"
+                class="w-full border border-gray-300 rounded-lg p-2">
+
+            <p class="text-xs text-gray-400 mt-2">
+                Format gambar: JPG, JPEG, PNG. Maksimal 5 MB.
+            </p>
+        </div>
+
+        <!-- TOMBOL -->
+        <div class="flex gap-3 justify-end">
+
+            <button
+                type="button"
+                id="btn-batal-tindak-lanjut"
+                class="px-4 py-2 rounded-lg border border-gray-300
+                   hover:bg-gray-50">
+                Batal
+            </button>
+
+            <button
+                type="button"
+                id="btn-simpan-tindak-lanjut"
+                class="px-5 py-2 rounded-lg bg-green-600
+                   hover:bg-green-700 text-white font-medium">
+                <i class="fa-solid fa-save mr-2"></i>
+                Simpan & Mulai Proses
+            </button>
+
+        </div>
     </div>
 
 </section>

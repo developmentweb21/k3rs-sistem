@@ -356,13 +356,71 @@
 				document.getElementById("detail-verifikasi-status").textContent =
 					report.status || "-";
 
-				// Tampilkan halaman detail setelah semua data berhasil diisi
+				// Atur tombol berdasarkan status laporan
+				updateVerificationAction(report);
+
+				// Tampilkan halaman detail
 				view("detail-verifikasi");
 			})
 			.catch(function (error) {
 				console.error("Gagal memuat detail laporan:", error);
 				toast(error.message || "Gagal memuat detail laporan.");
 			});
+	}
+	function updateVerificationAction(report) {
+		var button = document.getElementById("btn-verifikasi-laporan");
+
+		var statusInfo = document.getElementById("detail-verifikasi-status-info");
+
+		var actionInfo = document.getElementById("detail-verifikasi-action-info");
+
+		if (!button) {
+			return;
+		}
+
+		// Simpan data aktif pada tombol
+		button.dataset.id = report.id;
+		button.dataset.status = report.status;
+
+		button.disabled = false;
+
+		// Reset class
+		button.classList.remove(
+			"hidden",
+			"bg-green-600",
+			"hover:bg-green-700",
+			"bg-blue-600",
+			"hover:bg-blue-700",
+		);
+
+		if (report.status === "menunggu") {
+			statusInfo.textContent = "Laporan ini masih menunggu proses verifikasi.";
+
+			actionInfo.textContent =
+				"Verifikasi laporan untuk memulai proses tindak lanjut.";
+
+			button.innerHTML =
+				'<i class="fa-solid fa-check mr-2"></i> ' + "Verifikasi Laporan";
+
+			button.classList.add("bg-green-600", "hover:bg-green-700");
+		} else if (report.status === "diproses") {
+			statusInfo.textContent = "Laporan sedang dalam proses tindak lanjut.";
+
+			actionInfo.textContent =
+				"Klik tombol di bawah jika seluruh tindak lanjut sudah selesai.";
+
+			button.innerHTML =
+				'<i class="fa-solid fa-check-double mr-2"></i> ' + "Selesaikan Laporan";
+
+			button.classList.add("bg-blue-600", "hover:bg-blue-700");
+		} else if (report.status === "selesai") {
+			statusInfo.textContent =
+				"Laporan telah selesai dan tidak memerlukan tindakan lanjutan.";
+
+			actionInfo.textContent = "Tidak ada tindakan yang perlu dilakukan.";
+
+			button.classList.add("hidden");
+		}
 	}
 	/* EVENT TOMBOL KEMBALI */
 	/* EVENT HALAMAN DETAIL VERIFIKASI */
@@ -380,43 +438,37 @@
 	if (btnVerifikasi) {
 		btnVerifikasi.addEventListener("click", processVerification);
 	}
+
 	function processVerification() {
-		var id = document.getElementById("detail-verifikasi-id").textContent;
-
-		if (!id || id === "-") {
-			toast("ID laporan tidak ditemukan.");
-			return;
-		}
-
-		if (
-			!confirm(
-				"Apakah Anda yakin ingin memverifikasi laporan ini?\n\n" +
-					"Status laporan akan berubah menjadi DIPROSES.",
-			)
-		) {
-			return;
-		}
-
 		var button = document.getElementById("btn-verifikasi-laporan");
 
-		button.disabled = true;
-		button.innerHTML =
-			'<i class="fa-solid fa-spinner fa-spin mr-2"></i>' + "Memproses...";
+		if (!button) {
+			return;
+		}
 
-		api("laporan/verifikasi/proses/" + id, {}, "POST")
-			.then(function (response) {
-				toast(response.message || "Laporan berhasil diverifikasi.");
+		var status = button.dataset.status;
 
-				// Kembali ke daftar verifikasi
-				view("verifikasi");
-			})
-			.catch(function (error) {
-				toast(error.message || "Gagal memverifikasi laporan.");
+		// Jika masih menunggu, tampilkan form tindak lanjut
+		if (status === "menunggu") {
+			var form = document.getElementById("form-tindak-lanjut");
 
-				button.disabled = false;
-				button.innerHTML =
-					'<i class="fa-solid fa-check mr-2"></i>' + "Verifikasi Laporan";
-			});
+			if (form) {
+				form.classList.remove("hidden");
+
+				// Scroll ke form agar langsung terlihat
+				form.scrollIntoView({
+					behavior: "smooth",
+					block: "center",
+				});
+			}
+
+			return;
+		}
+
+		// Jika sedang diproses, tetap jalankan proses selesai
+		if (status === "diproses") {
+			completeVerification();
+		}
 	}
 
 	function updateVerificationFilter() {
@@ -441,6 +493,203 @@
 				loadVerification(this.dataset.status || "");
 			});
 		});
+
+	function updateVerificationAction(report) {
+		var button = document.getElementById("btn-verifikasi-laporan");
+
+		if (!button) {
+			return;
+		}
+
+		// Simpan data laporan pada tombol
+		button.dataset.id = report.id;
+		button.dataset.status = report.status;
+
+		button.disabled = false;
+
+		// MENUNGGU
+		if (report.status === "menunggu") {
+			button.classList.remove("hidden");
+			button.innerHTML =
+				'<i class="fa-solid fa-check mr-2"></i>' + "Verifikasi Laporan";
+
+			return;
+		}
+
+		// DIPROSES
+		if (report.status === "diproses") {
+			button.classList.remove("hidden");
+
+			button.innerHTML =
+				'<i class="fa-solid fa-check-double mr-2"></i>' + "Selesaikan Laporan";
+
+			return;
+		}
+
+		// SELESAI
+		if (report.status === "selesai") {
+			button.classList.add("hidden");
+		}
+	}
+
+	function completeVerification() {
+		var button = document.getElementById("btn-verifikasi-laporan");
+
+		if (!button) {
+			return;
+		}
+
+		var id = button.dataset.id;
+
+		if (!id) {
+			toast("ID laporan tidak ditemukan.");
+			return;
+		}
+
+		if (
+			!confirm(
+				"Apakah Anda yakin seluruh tindak lanjut telah selesai?\n\n" +
+					"Status laporan akan berubah menjadi SELESAI.",
+			)
+		) {
+			return;
+		}
+
+		var originalHtml = button.innerHTML;
+
+		button.disabled = true;
+
+		button.innerHTML =
+			'<i class="fa-solid fa-spinner fa-spin mr-2"></i> ' + "Memproses...";
+
+		api("laporan/verifikasi/proses/" + id, {}, "POST")
+			.then(function (response) {
+				toast(response.message || "Laporan berhasil diselesaikan.");
+
+				loadVerificationDetail(id);
+			})
+			.catch(function (error) {
+				console.error(error);
+
+				toast(error.message || "Gagal menyelesaikan laporan.");
+
+				button.disabled = false;
+				button.innerHTML = originalHtml;
+			});
+	}
+
+	var btnBatalTindakLanjut = document.getElementById("btn-batal-tindak-lanjut");
+
+	if (btnBatalTindakLanjut) {
+		btnBatalTindakLanjut.addEventListener("click", function () {
+			var form = document.getElementById("form-tindak-lanjut");
+
+			if (form) {
+				form.classList.add("hidden");
+			}
+		});
+	}
+
+	function saveTindakLanjut() {
+		var button = document.getElementById("btn-simpan-tindak-lanjut");
+
+		var mainButton = document.getElementById("btn-verifikasi-laporan");
+
+		var keterangan = document.getElementById("tindak-lanjut-keterangan");
+
+		var foto = document.getElementById("tindak-lanjut-foto");
+
+		if (!button || !mainButton || !keterangan) {
+			return;
+		}
+
+		var id = mainButton.dataset.id;
+
+		if (!id) {
+			toast("ID laporan tidak ditemukan.");
+			return;
+		}
+
+		if (!keterangan.value.trim()) {
+			toast("Keterangan atau tindakan lanjutan wajib diisi.");
+
+			keterangan.focus();
+			return;
+		}
+
+		var formData = new FormData();
+
+		formData.append("keterangan", keterangan.value.trim());
+
+		if (foto && foto.files && foto.files.length > 0) {
+			formData.append("foto", foto.files[0]);
+		}
+
+		var originalHtml = button.innerHTML;
+
+		button.disabled = true;
+
+		button.innerHTML =
+			'<i class="fa-solid fa-spinner fa-spin mr-2"></i> ' + "Menyimpan...";
+
+		/*
+		 * Catatan:
+		 * Fungsi api() lama kemungkinan mengirim JSON.
+		 * Untuk upload file kita gunakan fetch langsung.
+		 */
+
+		fetch("api/laporan/verifikasi/proses/" + id, {
+			method: "POST",
+			body: formData,
+		})
+			.then(function (response) {
+				return response.json().then(function (data) {
+					if (!response.ok) {
+						throw new Error(data.message || "Gagal menyimpan verifikasi.");
+					}
+
+					return data;
+				});
+			})
+			.then(function (response) {
+				toast(response.message || "Verifikasi berhasil disimpan.");
+
+				// Reset form
+				keterangan.value = "";
+
+				if (foto) {
+					foto.value = "";
+				}
+
+				// Sembunyikan form
+				var form = document.getElementById("form-tindak-lanjut");
+
+				if (form) {
+					form.classList.add("hidden");
+				}
+
+				// Ambil ulang detail terbaru
+				loadVerificationDetail(id);
+			})
+			.catch(function (error) {
+				console.error(error);
+
+				toast(error.message || "Gagal menyimpan verifikasi.");
+			})
+			.finally(function () {
+				button.disabled = false;
+				button.innerHTML = originalHtml;
+			});
+	}
+
+	var btnSimpanTindakLanjut = document.getElementById(
+		"btn-simpan-tindak-lanjut",
+	);
+
+	if (btnSimpanTindakLanjut) {
+		btnSimpanTindakLanjut.addEventListener("click", saveTindakLanjut);
+	}
+
 	function escapeHtml(value) {
 		return String(value || "").replace(/[&<>"']/g, function (char) {
 			return {
