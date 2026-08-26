@@ -328,6 +328,7 @@
 		api("laporan/detail_verifikasi/" + id, null, "GET")
 			.then(function (response) {
 				var report = response.laporan;
+				var tindakLanjut = response.tindak_lanjut || [];
 
 				document.getElementById("detail-verifikasi-id").textContent =
 					report.id || "-";
@@ -356,6 +357,7 @@
 				document.getElementById("detail-verifikasi-status").textContent =
 					report.status || "-";
 
+				renderTindakLanjut(tindakLanjut);
 				// Atur tombol berdasarkan status laporan
 				updateVerificationAction(report);
 
@@ -367,6 +369,177 @@
 				toast(error.message || "Gagal memuat detail laporan.");
 			});
 	}
+	function renderTindakLanjut(items) {
+		var card = document.getElementById("detail-tindak-lanjut-card");
+
+		var container = document.getElementById("detail-tindak-lanjut-list");
+
+		if (!card || !container) {
+			return;
+		}
+
+		items = items || [];
+
+		if (items.length === 0) {
+			card.classList.add("hidden");
+			container.innerHTML = "";
+			return;
+		}
+
+		card.classList.remove("hidden");
+
+		container.innerHTML = items
+			.map(function (item) {
+				var fotoHtml = "";
+
+				if (item.foto_url) {
+					fotoHtml =
+						'<div class="mt-4">' +
+						'<p class="text-sm text-gray-500 mb-2">' +
+						"Foto Dokumentasi" +
+						"</p>" +
+						'<a href="' +
+						escapeHtml(item.foto_url) +
+						'" target="_blank" rel="noopener">' +
+						'<img src="' +
+						escapeHtml(item.foto_url) +
+						'" alt="Foto dokumentasi" ' +
+						'class="w-full max-w-md rounded-lg border ' +
+						'hover:opacity-90 transition">' +
+						"</a>" +
+						"</div>";
+				}
+
+				return (
+					'<div class="border border-gray-200 rounded-xl p-5">' +
+					'<div class="flex justify-between items-start gap-3 mb-4">' +
+					"<div>" +
+					'<p class="font-semibold text-gray-800">' +
+					'<i class="fa-solid fa-user-check text-blue-600 mr-2"></i>' +
+					escapeHtml(item.verifikator || "Verifikator K3") +
+					"</p>" +
+					'<p class="text-sm text-gray-500 mt-1">' +
+					'<i class="fa-regular fa-clock mr-1"></i>' +
+					escapeHtml(item.created_at || "-") +
+					"</p>" +
+					"</div>" +
+					'<span class="text-xs bg-blue-100 text-blue-700 ' +
+					'px-3 py-1 rounded-full">' +
+					"Tindak Lanjut" +
+					"</span>" +
+					"</div>" +
+					'<div class="border-t pt-4">' +
+					'<p class="text-sm text-gray-500 mb-2">' +
+					"Keterangan / Tindakan Lanjutan" +
+					"</p>" +
+					'<div class="text-gray-700 whitespace-pre-line leading-relaxed">' +
+					escapeHtml(item.keterangan || "-") +
+					"</div>" +
+					"</div>" +
+					fotoHtml +
+					"</div>" +
+					'<div class="mt-4 pt-4 border-t flex justify-end">' +
+					"<button " +
+					'type="button" ' +
+					'onclick="editTindakLanjut(' +
+					item.id +
+					')" ' +
+					'class="text-sm px-4 py-2 rounded-lg ' +
+					'bg-blue-600 hover:bg-blue-700 text-white">' +
+					'<i class="fa-solid fa-pen mr-2"></i>' +
+					"Edit Tindak Lanjut" +
+					"</button>" +
+					"</div>"
+				);
+			})
+			.join("");
+	}
+
+	function editTindakLanjut(id) {
+		api("laporan/tindak-lanjut/" + id, {}, "GET")
+			.then(function (response) {
+				var item = response.tindak_lanjut;
+
+				document.getElementById("edit-tindak-lanjut-id").value = item.id;
+
+				document.getElementById("edit-tindak-lanjut-keterangan").value =
+					item.keterangan || "";
+
+				var modal = document.getElementById("modal-edit-tindak-lanjut");
+
+				modal.classList.remove("hidden");
+				modal.classList.add("flex");
+			})
+			.catch(function (error) {
+				toast(error.message || "Gagal mengambil data tindak lanjut.");
+			});
+	}
+	function closeEditTindakLanjut() {
+		var modal = document.getElementById("modal-edit-tindak-lanjut");
+
+		modal.classList.add("hidden");
+		modal.classList.remove("flex");
+	}
+	function updateTindakLanjut() {
+		var id = document.getElementById("edit-tindak-lanjut-id").value;
+
+		var keterangan = document
+			.getElementById("edit-tindak-lanjut-keterangan")
+			.value.trim();
+
+		var foto = document.getElementById("edit-tindak-lanjut-foto");
+
+		if (!keterangan) {
+			toast("Keterangan wajib diisi.");
+			return;
+		}
+
+		var formData = new FormData();
+
+		formData.append("keterangan", keterangan);
+
+		if (foto.files.length > 0) {
+			formData.append("foto", foto.files[0]);
+		}
+
+		var button = document.getElementById("btn-update-tindak-lanjut");
+
+		button.disabled = true;
+
+		fetch("api/laporan/tindak-lanjut/update/" + id, {
+			method: "POST",
+			body: formData,
+		})
+			.then(function (response) {
+				return response.json().then(function (data) {
+					if (!response.ok) {
+						throw new Error(data.message || "Gagal menyimpan perubahan.");
+					}
+
+					return data;
+				});
+			})
+			.then(function (response) {
+				toast(response.message);
+
+				closeEditTindakLanjut();
+
+				// Muat ulang detail laporan aktif
+				var mainButton = document.getElementById("btn-verifikasi-laporan");
+
+				loadVerificationDetail(mainButton.dataset.id);
+			})
+			.catch(function (error) {
+				toast(error.message);
+			})
+			.finally(function () {
+				button.disabled = false;
+			});
+	}
+	document
+		.getElementById("btn-update-tindak-lanjut")
+		.addEventListener("click", updateTindakLanjut);
+
 	function updateVerificationAction(report) {
 		var button = document.getElementById("btn-verifikasi-laporan");
 

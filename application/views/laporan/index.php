@@ -199,7 +199,96 @@
                     -
                 </div>
             </div>
+            <!-- RIWAYAT TINDAK LANJUT -->
+            <div
+                id="detail-tindak-lanjut-card"
+                class="glass rounded-xl p-6 hidden">
+                <h3 class="font-bold text-lg mb-5">
+                    <i class="fa-solid fa-clipboard-list text-blue-600 mr-2"></i>
+                    Tindak Lanjut Verifikasi
+                </h3>
 
+                <div
+                    id="detail-tindak-lanjut-list"
+                    class="space-y-4">
+                    <!-- Diisi oleh JavaScript -->
+                </div>
+            </div>
+
+        </div>
+
+        <!-- MODAL EDIT TINDAK LANJUT -->
+        <div
+            id="modal-edit-tindak-lanjut"
+            class="fixed inset-0 bg-black/50 hidden
+           items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-xl w-full max-w-2xl p-6">
+
+                <div class="flex justify-between items-center mb-5">
+                    <h3 class="font-bold text-lg">
+                        Edit Tindak Lanjut
+                    </h3>
+
+                    <button
+                        type="button"
+                        onclick="closeEditTindakLanjut()"
+                        class="text-gray-500 hover:text-gray-700">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
+
+                <input
+                    type="hidden"
+                    id="edit-tindak-lanjut-id">
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">
+                        Keterangan / Tindakan Lanjutan
+                        <span class="text-red-500">*</span>
+                    </label>
+
+                    <textarea
+                        id="edit-tindak-lanjut-keterangan"
+                        rows="5"
+                        class="w-full border rounded-lg p-3"></textarea>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">
+                        Ganti Foto Dokumentasi
+                        <span class="text-gray-400">(Opsional)</span>
+                    </label>
+
+                    <input
+                        type="file"
+                        id="edit-tindak-lanjut-foto"
+                        accept="image/jpeg,image/png"
+                        class="w-full border rounded-lg p-2">
+                </div>
+
+                <div
+                    id="edit-tindak-lanjut-foto-lama"
+                    class="mb-4"></div>
+
+                <div class="flex justify-end gap-3">
+                    <button
+                        type="button"
+                        onclick="closeEditTindakLanjut()"
+                        class="px-4 py-2 border rounded-lg">
+                        Batal
+                    </button>
+
+                    <button
+                        type="button"
+                        id="btn-update-tindak-lanjut"
+                        class="px-5 py-2 bg-blue-600
+                       hover:bg-blue-700 text-white rounded-lg">
+                        <i class="fa-solid fa-save mr-2"></i>
+                        Simpan Perubahan
+                    </button>
+                </div>
+
+            </div>
         </div>
 
         <!-- Informasi Pelapor -->

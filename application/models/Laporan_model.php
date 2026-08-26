@@ -139,4 +139,18 @@ class Laporan_model extends CI_Model
             ->get()
             ->result_array();
     }
+    public function get_tindak_lanjut_by_id($id)
+    {
+        return $this->db
+            ->where('id', $id)
+            ->get('laporan_tindak_lanjut')
+            ->row_array();
+    }
+
+    public function update_tindak_lanjut($id, $data)
+    {
+        return $this->db
+            ->where('id', $id)
+            ->update('laporan_tindak_lanjut', $data);
+    }
 }

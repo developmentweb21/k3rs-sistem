@@ -103,8 +103,21 @@ class Laporan extends CI_Controller
             );
         }
 
+        $tindak_lanjut = $this->Laporan_model
+            ->get_tindak_lanjut_laporan($id);
+
+        // Buat URL lengkap untuk foto dokumentasi
+        foreach ($tindak_lanjut as &$item) {
+            if (!empty($item['foto'])) {
+                $item['foto_url'] = base_url($item['foto']);
+            } else {
+                $item['foto_url'] = null;
+            }
+        }
+
         return $this->json(array(
-            'laporan' => $laporan
+            'laporan' => $laporan,
+            'tindak_lanjut' => $tindak_lanjut
         ));
     }
     public function proses_verifikasi($id = null)
