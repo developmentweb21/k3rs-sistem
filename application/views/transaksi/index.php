@@ -1,3 +1,43 @@
-<section data-view="insiden" class="hidden max-w-2xl mx-auto"><div class="glass p-6 rounded-xl"><h2 class="text-2xl font-bold mb-4">Form Laporan Insiden K3</h2><form class="report-form" data-type="insiden"><label>Kategori Kejadian</label><select id="lap-kategori" class="input" required></select><div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4"><input type="date" class="input" required><input class="input" placeholder="Lokasi kejadian" required></div><label>Kronologi Singkat</label><textarea class="input" rows="4" required></textarea><label class="mt-4 block">Tindakan Pertama</label><input class="input mb-5" required><button class="button bg-blue-600">Kirim Laporan</button></form></div></section>
-<section data-view="kesehatan" class="hidden max-w-2xl mx-auto"><div class="glass p-6 rounded-xl"><h2 class="text-2xl font-bold mb-2">Laporan Kesehatan Karyawan</h2><form class="report-form" data-type="kesehatan"><label>Unit Kerja</label><input id="lap-sehat-unit" class="input bg-gray-100" readonly><label class="mt-4 block">Nama Karyawan</label><select id="lap-sehat-nama" class="input" required></select><label class="mt-4 block">Diagnosa / Keluhan</label><input class="input" required><label class="mt-4 block">Hari Tidak Masuk</label><input type="number" min="0" value="0" class="input mb-5" required><button class="button bg-green-600">Kirim Data Kesehatan</button></form></div></section>
-<section data-view="checklist" class="hidden max-w-2xl mx-auto"><div class="glass p-6 rounded-xl"><h2 class="text-2xl font-bold mb-4">Checklist Kepatuhan K3 Unit</h2><form class="report-form" data-type="checklist"><div class="grid grid-cols-2 gap-4"><input type="month" class="input" required><input type="date" class="input" required></div><label class="mt-4 block">Unit Kerja</label><select id="check-unit" class="input" required></select><div id="checklist-items" class="bg-blue-50 p-4 rounded-md my-5"></div><button class="button bg-teal-600">Simpan Checklist Bulanan</button></form></div></section>
+<section data-view="insiden" class="hidden max-w-2xl mx-auto">
+    <div class="glass p-6 rounded-xl">
+        <h2 class="text-2xl font-bold mb-4">Form Laporan Insiden K3</h2>
+        <form class="report-form" data-type="insiden">
+            <label>Kategori Kejadian</label>
+            <select id="lap-kategori" class="input" required></select>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+                <input type="date" class="input" required><input class="input" placeholder="Lokasi kejadian" required>
+            </div><label>Kronologi Singkat</label>
+            <textarea class="input" rows="4" required></textarea>
+            <label class="mt-4 block">Tindakan Pertama</label><input class="input mb-5" required>
+            <button class="button bg-blue-600">Kirim Laporan</button>
+        </form>
+    </div>
+</section>
+<section data-view="kesehatan" class="hidden max-w-2xl mx-auto">
+    <div class="glass p-6 rounded-xl">
+        <h2 class="text-2xl font-bold mb-2">Laporan Kesehatan Karyawan</h2>
+        <form class="report-form" data-type="kesehatan">
+            <label>Unit Kerja</label><input id="lap-sehat-unit" class="input bg-gray-100" readonly>
+            <label class="mt-4 block">Nama Karyawan</label><select id="lap-sehat-nama" class="input" required>
+            </select><label class="mt-4 block">Diagnosa / Keluhan</label><input class="input" required>
+            <label class="mt-4 block">Hari Tidak Masuk</label>
+            <input type="number" min="0" value="0" class="input mb-5" required>
+            <button class="button bg-green-600">Kirim Data Kesehatan</button>
+        </form>
+    </div>
+</section>
+<section data-view="checklist" class="hidden max-w-2xl mx-auto">
+    <div class="glass p-6 rounded-xl">
+        <h2 class="text-2xl font-bold mb-4">Checklist Kepatuhan K3 Unit</h2>
+        <form class="report-form" data-type="checklist">
+            <div class="grid grid-cols-2 gap-4">
+                <input type="month" class="input" required><input type="date" class="input" required>
+            </div><label class="mt-4 block">Unit Kerja</label>
+            <select id="check-unit" class="input" required></select>
+            <div id="checklist-items" class="bg-blue-50 p-4 rounded-md my-5">
+
+            </div>
+            <button class="button bg-teal-600">Simpan Checklist Bulanan</button>
+        </form>
+    </div>
+</section>

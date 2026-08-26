@@ -39,6 +39,10 @@
 		if (name === "verifikasi") {
 			loadVerification(currentVerificationStatus);
 		}
+
+		if (name === "riwayat-insiden") {
+			loadIncidentHistory();
+		}
 	}
 	function render() {
 		document.getElementById("sidebar-user-name").textContent = data.user.nama;
@@ -538,9 +542,14 @@
 				button.disabled = false;
 			});
 	}
-	document
-		.getElementById("btn-update-tindak-lanjut")
-		.addEventListener("click", updateTindakLanjut);
+	var btnUpdateTindakLanjut = document.getElementById(
+		"btn-update-tindak-lanjut",
+	);
+
+	if (btnUpdateTindakLanjut) {
+		btnUpdateTindakLanjut.addEventListener("click", updateTindakLanjut);
+	}
+
 	document.addEventListener("click", function (event) {
 		var editButton = event.target.closest("[data-edit-tindak-lanjut]");
 
@@ -561,7 +570,8 @@
 		closeEditTindakLanjut();
 	});
 
-	function updateVerificationAction(report) {
+	//v1
+	/* function updateVerificationAction(report) {
 		var button = document.getElementById("btn-verifikasi-laporan");
 
 		var statusInfo = document.getElementById("detail-verifikasi-status-info");
@@ -615,7 +625,7 @@
 
 			button.classList.add("hidden");
 		}
-	}
+	} */
 	/* EVENT TOMBOL KEMBALI */
 	/* EVENT HALAMAN DETAIL VERIFIKASI */
 
@@ -688,6 +698,7 @@
 			});
 		});
 
+	//v2
 	function updateVerificationAction(report) {
 		var button = document.getElementById("btn-verifikasi-laporan");
 
@@ -1529,8 +1540,18 @@
 				.then(function (response) {
 					toast(response.message);
 					form.reset();
-					document.getElementById("lap-sehat-unit").value = data.user.unit;
-					if (form.dataset.type === "insiden") loadIncidentHistory();
+
+					var lapSehatUnit = document.getElementById("lap-sehat-unit");
+
+					if (lapSehatUnit) {
+						lapSehatUnit.value = data.user.unit;
+					}
+
+					// Jika berhasil mengirim laporan insiden,
+					// langsung arahkan ke menu Riwayat Insiden
+					if (form.dataset.type === "insiden") {
+						view("riwayat-insiden");
+					}
 				})
 				.catch(function (error) {
 					toast(error.message);
