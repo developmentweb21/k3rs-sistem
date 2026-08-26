@@ -4,6 +4,9 @@
 	var employeeRows = [];
 	var menuRows = [];
 	var roleRows = [];
+
+	// Menyimpan status filter Verifikasi yang sedang aktif
+	var currentVerificationStatus = "";
 	function options(items) {
 		return (
 			'<option value="">-- Pilih --</option>' +
@@ -34,7 +37,7 @@
 		});
 
 		if (name === "verifikasi") {
-			loadVerification();
+			loadVerification(currentVerificationStatus);
 		}
 	}
 	function render() {
@@ -236,46 +239,75 @@
 				toast(error.message);
 			});
 	}
-	function loadVerification() {
-		api("laporan/verifikasi", null, "GET")
+	function loadVerification(status) {
+		if (typeof status !== "undefined") {
+			currentVerificationStatus = status;
+		}
+
+		var endpoint = "laporan/verifikasi";
+
+		if (currentVerificationStatus) {
+			endpoint += "?status=" + encodeURIComponent(currentVerificationStatus);
+		}
+
+		api(endpoint, null, "GET")
 			.then(function (response) {
 				var rows = response.laporan || [];
 
-				document.getElementById("table-verifikasi").innerHTML =
+				var table = document.getElementById("table-verifikasi");
+
+				if (!table) {
+					return;
+				}
+
+				table.innerHTML =
 					rows
 						.map(function (report) {
+							var statusClass =
+								report.status === "menunggu"
+									? "bg-yellow-100 text-yellow-700"
+									: report.status === "diproses"
+										? "bg-blue-100 text-blue-700"
+										: "bg-green-100 text-green-700";
+
 							return (
-								'<tr class="border-b">' +
+								'<tr class="border-b border-gray-100 hover:bg-gray-50">' +
 								'<td class="p-4">' +
-								escapeHtml(report.tanggal_kejadian) +
+								escapeHtml(report.tanggal_kejadian || "-") +
 								"</td>" +
-								"<td>" +
-								escapeHtml(report.pelapor) +
+								'<td class="p-4">' +
+								escapeHtml(report.pelapor || "-") +
 								"</td>" +
-								"<td>" +
-								escapeHtml(report.kategori) +
+								'<td class="p-4">' +
+								escapeHtml(report.kategori || "-") +
 								"</td>" +
-								"<td>" +
-								escapeHtml(report.lokasi) +
+								'<td class="p-4">' +
+								escapeHtml(report.lokasi || "-") +
 								"</td>" +
-								"<td>" +
-								'<span class="badge bg-blue-100 text-blue-700">' +
-								escapeHtml(report.status) +
+								'<td class="p-4">' +
+								'<span class="px-3 py-1 rounded-full text-xs font-medium ' +
+								statusClass +
+								'">' +
+								escapeHtml(report.status || "-") +
 								"</span>" +
 								"</td>" +
 								'<td class="p-4 text-center">' +
-								'<button class="text-blue-600" data-verify="' +
+								'<button class="text-blue-600 hover:text-blue-800 font-medium" ' +
+								'data-verify="' +
 								report.id +
 								'">' +
-								'<i class="fa-solid fa-eye"></i> Detail' +
+								'<i class="fa-solid fa-eye mr-1"></i> Detail' +
 								"</button>" +
 								"</td>" +
 								"</tr>"
 							);
 						})
 						.join("") ||
-					'<tr><td colspan="6" class="p-4 text-gray-500">' +
-						"Tidak ada laporan yang menunggu verifikasi.</td></tr>";
+					"<tr>" +
+						'<td colspan="6" class="p-6 text-center text-gray-500">' +
+						"Tidak ada laporan untuk status ini." +
+						"</td>" +
+						"</tr>";
 
 				// Event tombol Detail
 				document.querySelectorAll("[data-verify]").forEach(function (button) {
@@ -283,12 +315,13 @@
 						loadVerificationDetail(this.dataset.verify);
 					});
 				});
+
+				updateVerificationFilter();
 			})
 			.catch(function (error) {
-				document.getElementById("table-verifikasi").innerHTML =
-					'<tr><td colspan="6" class="p-4 text-red-600">' +
-					escapeHtml(error.message) +
-					"</td></tr>";
+				console.error(error);
+
+				toast(error.message || "Gagal memuat data laporan.");
 			});
 	}
 	function loadVerificationDetail(id) {
@@ -332,6 +365,8 @@
 			});
 	}
 	/* EVENT TOMBOL KEMBALI */
+	/* EVENT HALAMAN DETAIL VERIFIKASI */
+
 	var btnKembaliVerifikasi = document.getElementById("btn-kembali-verifikasi");
 
 	if (btnKembaliVerifikasi) {
@@ -339,6 +374,73 @@
 			view("verifikasi");
 		});
 	}
+
+	var btnVerifikasi = document.getElementById("btn-verifikasi-laporan");
+
+	if (btnVerifikasi) {
+		btnVerifikasi.addEventListener("click", processVerification);
+	}
+	function processVerification() {
+		var id = document.getElementById("detail-verifikasi-id").textContent;
+
+		if (!id || id === "-") {
+			toast("ID laporan tidak ditemukan.");
+			return;
+		}
+
+		if (
+			!confirm(
+				"Apakah Anda yakin ingin memverifikasi laporan ini?\n\n" +
+					"Status laporan akan berubah menjadi DIPROSES.",
+			)
+		) {
+			return;
+		}
+
+		var button = document.getElementById("btn-verifikasi-laporan");
+
+		button.disabled = true;
+		button.innerHTML =
+			'<i class="fa-solid fa-spinner fa-spin mr-2"></i>' + "Memproses...";
+
+		api("laporan/verifikasi/proses/" + id, {}, "POST")
+			.then(function (response) {
+				toast(response.message || "Laporan berhasil diverifikasi.");
+
+				// Kembali ke daftar verifikasi
+				view("verifikasi");
+			})
+			.catch(function (error) {
+				toast(error.message || "Gagal memverifikasi laporan.");
+
+				button.disabled = false;
+				button.innerHTML =
+					'<i class="fa-solid fa-check mr-2"></i>' + "Verifikasi Laporan";
+			});
+	}
+
+	function updateVerificationFilter() {
+		document
+			.querySelectorAll(".btn-filter-verifikasi")
+			.forEach(function (button) {
+				var status = button.dataset.status || "";
+
+				// Reset tampilan
+				button.classList.remove("ring-2", "ring-blue-500", "font-bold");
+
+				// Status aktif
+				if (status === currentVerificationStatus) {
+					button.classList.add("ring-2", "ring-blue-500", "font-bold");
+				}
+			});
+	}
+	document
+		.querySelectorAll(".btn-filter-verifikasi")
+		.forEach(function (button) {
+			button.addEventListener("click", function () {
+				loadVerification(this.dataset.status || "");
+			});
+		});
 	function escapeHtml(value) {
 		return String(value || "").replace(/[&<>"']/g, function (char) {
 			return {

@@ -51,6 +51,42 @@
             Laporan yang menunggu verifikasi
         </span>
     </div>
+    <!-- FILTER STATUS VERIFIKASI -->
+    <div class="flex flex-wrap gap-2 mb-5">
+
+        <button
+            type="button"
+            class="btn-filter-verifikasi px-4 py-2 rounded-lg
+               bg-blue-600 text-white font-medium"
+            data-status="">
+            Semua
+        </button>
+
+        <button
+            type="button"
+            class="btn-filter-verifikasi px-4 py-2 rounded-lg
+               bg-yellow-100 text-yellow-700 font-medium"
+            data-status="menunggu">
+            Menunggu
+        </button>
+
+        <button
+            type="button"
+            class="btn-filter-verifikasi px-4 py-2 rounded-lg
+               bg-blue-100 text-blue-700 font-medium"
+            data-status="diproses">
+            Diproses
+        </button>
+
+        <button
+            type="button"
+            class="btn-filter-verifikasi px-4 py-2 rounded-lg
+               bg-green-100 text-green-700 font-medium"
+            data-status="selesai">
+            Selesai
+        </button>
+
+    </div>
 
     <div class="glass overflow-x-auto rounded-xl">
         <table class="w-full text-left">
@@ -208,6 +244,31 @@
                         <span id="detail-verifikasi-id" class="font-medium">-</span>
                     </div>
                 </div>
+            </div>
+            <!-- PROSES VERIFIKASI -->
+            <div class="glass rounded-xl p-6">
+
+                <h3 class="font-bold text-lg mb-2">
+                    <i class="fa-solid fa-check-circle text-green-600 mr-2"></i>
+                    Proses Verifikasi
+                </h3>
+
+                <p class="text-sm text-gray-500 mb-4">
+                    Setelah laporan diverifikasi, status akan berubah menjadi
+                    <strong>diproses</strong>.
+                </p>
+
+                <button
+                    type="button"
+                    id="btn-verifikasi-laporan"
+                    class="w-full bg-green-600 hover:bg-green-700 text-white
+               font-medium py-3 px-4 rounded-lg transition">
+
+                    <i class="fa-solid fa-check mr-2"></i>
+                    Verifikasi Laporan
+
+                </button>
+
             </div>
 
         </div>

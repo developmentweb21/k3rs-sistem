@@ -26,29 +26,38 @@ class Laporan_model extends CI_Model
         if ($user['role'] !== 'admin') $this->db->where('laporan_insiden.user_id', $user['id']);
         return $this->db->order_by('laporan_insiden.created_at', 'DESC')->get()->result_array();
     }
-    public function get_laporan_verifikasi()
+    public function get_laporan_verifikasi($status = null)
     {
-        return $this->db
-            ->select('
-            laporan_insiden.id,
-            laporan_insiden.tanggal_kejadian,
-            laporan_insiden.kategori,
-            laporan_insiden.lokasi,
-            laporan_insiden.kronologi,
-            laporan_insiden.tindakan_awal,
-            laporan_insiden.status,
-            laporan_insiden.created_at,
-            users.nama_lengkap AS pelapor
-        ')
-            ->from('laporan_insiden')
-            ->join(
-                'users',
-                'users.id = laporan_insiden.user_id'
-            )
-            ->where('laporan_insiden.status', 'menunggu')
-            ->order_by('laporan_insiden.created_at', 'DESC')
-            ->get()
-            ->result_array();
+        $this->db->select('
+        laporan_insiden.id,
+        laporan_insiden.tanggal_kejadian,
+        laporan_insiden.kategori,
+        laporan_insiden.lokasi,
+        laporan_insiden.kronologi,
+        laporan_insiden.tindakan_awal,
+        laporan_insiden.status,
+        laporan_insiden.created_at,
+        users.nama_lengkap AS pelapor
+    ');
+
+        $this->db->from('laporan_insiden');
+
+        $this->db->join(
+            'users',
+            'users.id = laporan_insiden.user_id'
+        );
+
+        // Filter berdasarkan status jika dipilih
+        if (!empty($status)) {
+            $this->db->where('laporan_insiden.status', $status);
+        }
+
+        $this->db->order_by(
+            'laporan_insiden.created_at',
+            'DESC'
+        );
+
+        return $this->db->get()->result_array();
     }
     public function get_detail_laporan_verifikasi($id)
     {
@@ -69,5 +78,19 @@ class Laporan_model extends CI_Model
             ->where('laporan_insiden.id', $id)
             ->get()
             ->row_array();
+    }
+    public function verifikasi_laporan($id)
+    {
+        $this->db
+            ->where('id', $id)
+            ->where('status', 'menunggu')
+            ->update(
+                'laporan_insiden',
+                array(
+                    'status' => 'diproses'
+                )
+            );
+
+        return $this->db->affected_rows() > 0;
     }
 }
