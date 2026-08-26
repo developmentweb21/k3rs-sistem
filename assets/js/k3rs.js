@@ -427,8 +427,7 @@
 					escapeHtml(item.created_at || "-") +
 					"</p>" +
 					"</div>" +
-					'<span class="text-xs bg-blue-100 text-blue-700 ' +
-					'px-3 py-1 rounded-full">' +
+					'<span class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">' +
 					"Tindak Lanjut" +
 					"</span>" +
 					"</div>" +
@@ -443,15 +442,9 @@
 					fotoHtml +
 					"</div>" +
 					'<div class="mt-4 pt-4 border-t flex justify-end">' +
-					"<button " +
-					'type="button" ' +
-					"<button " +
-					'type="button" ' +
-					'data-edit-tindak-lanjut="' +
+					'<button type="button" data-edit-tindak-lanjut="' +
 					item.id +
-					'" ' +
-					'class="text-sm px-4 py-2 rounded-lg ' +
-					'bg-blue-600 hover:bg-blue-700 text-white">' +
+					'" class="text-sm px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white">' +
 					'<i class="fa-solid fa-pen mr-2"></i>' +
 					"Edit Tindak Lanjut" +
 					"</button>" +
@@ -1025,10 +1018,18 @@
 			});
 	}
 	function loadIncidentHistory() {
-		api("laporan/riwayat", null, "GET")
+		return api("laporan/riwayat", null, "GET")
 			.then(function (response) {
-				document.getElementById("table-riwayat-insiden").innerHTML =
-					response.laporan
+				var table = document.getElementById("table-riwayat-insiden");
+
+				if (!table) {
+					return response;
+				}
+
+				var laporan = response.laporan || [];
+
+				table.innerHTML =
+					laporan
 						.map(function (report) {
 							var statusClass =
 								report.status === "selesai"
@@ -1036,8 +1037,10 @@
 									: report.status === "diproses"
 										? "bg-yellow-100 text-yellow-700"
 										: "bg-blue-100 text-blue-700";
+
 							return (
-								'<tr class="border-b"><td class="p-4">' +
+								'<tr class="border-b">' +
+								'<td class="p-4">' +
 								escapeHtml(report.tanggal_kejadian) +
 								"</td><td>" +
 								escapeHtml(report.kategori) +
@@ -1045,7 +1048,8 @@
 								escapeHtml(report.lokasi) +
 								"</td><td>" +
 								escapeHtml(report.pelapor) +
-								'</td><td class="p-4"><span class="badge ' +
+								'</td><td class="p-4">' +
+								'<span class="badge ' +
 								statusClass +
 								'">' +
 								escapeHtml(report.status) +
@@ -1053,13 +1057,23 @@
 							);
 						})
 						.join("") ||
-					'<tr><td class="p-4 text-gray-500" colspan="5">Belum ada laporan insiden.</td></tr>';
+					'<tr><td class="p-4 text-gray-500" colspan="5">' +
+						"Belum ada laporan insiden." +
+						"</td></tr>";
+
+				return response;
 			})
 			.catch(function (error) {
-				document.getElementById("table-riwayat-insiden").innerHTML =
-					'<tr><td class="p-4 text-red-600" colspan="5">' +
-					escapeHtml(error.message) +
-					"</td></tr>";
+				var table = document.getElementById("table-riwayat-insiden");
+
+				if (table) {
+					table.innerHTML =
+						'<tr><td class="p-4 text-red-600" colspan="5">' +
+						escapeHtml(error.message) +
+						"</td></tr>";
+				}
+
+				throw error;
 			});
 	}
 	function showEmployeeForm(user) {
