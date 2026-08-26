@@ -441,9 +441,11 @@
 					'<div class="mt-4 pt-4 border-t flex justify-end">' +
 					"<button " +
 					'type="button" ' +
-					'onclick="editTindakLanjut(' +
+					"<button " +
+					'type="button" ' +
+					'data-edit-tindak-lanjut="' +
 					item.id +
-					')" ' +
+					'" ' +
 					'class="text-sm px-4 py-2 rounded-lg ' +
 					'bg-blue-600 hover:bg-blue-700 text-white">' +
 					'<i class="fa-solid fa-pen mr-2"></i>' +
@@ -506,7 +508,7 @@
 
 		button.disabled = true;
 
-		fetch("api/laporan/tindak-lanjut/update/" + id, {
+		fetch(window.K3RS_API_URL + "laporan/tindak-lanjut/update/" + id, {
 			method: "POST",
 			body: formData,
 		})
@@ -539,6 +541,25 @@
 	document
 		.getElementById("btn-update-tindak-lanjut")
 		.addEventListener("click", updateTindakLanjut);
+	document.addEventListener("click", function (event) {
+		var editButton = event.target.closest("[data-edit-tindak-lanjut]");
+
+		if (!editButton) {
+			return;
+		}
+
+		editTindakLanjut(editButton.dataset.editTindakLanjut);
+	});
+
+	document.addEventListener("click", function (event) {
+		var closeButton = event.target.closest("[data-close-edit-tindak-lanjut]");
+
+		if (!closeButton) {
+			return;
+		}
+
+		closeEditTindakLanjut();
+	});
 
 	function updateVerificationAction(report) {
 		var button = document.getElementById("btn-verifikasi-laporan");

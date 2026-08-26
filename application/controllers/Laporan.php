@@ -347,4 +347,208 @@ class Laporan extends CI_Controller
             400
         );
     }
+    public function detail_tindak_lanjut($id = null)
+    {
+        $user = $this->session->userdata('k3rs_user');
+
+        if (!$user) {
+            return $this->json(
+                array('message' => 'Sesi login tidak ditemukan.'),
+                401
+            );
+        }
+
+        if ($user['role'] !== 'admin') {
+            return $this->json(
+                array('message' => 'Akses ditolak.'),
+                403
+            );
+        }
+
+        $item = $this->Laporan_model
+            ->get_tindak_lanjut_by_id($id);
+
+        if (!$item) {
+            return $this->json(
+                array('message' => 'Data tindak lanjut tidak ditemukan.'),
+                404
+            );
+        }
+
+        if (!empty($item['foto'])) {
+            $item['foto_url'] = base_url($item['foto']);
+        } else {
+            $item['foto_url'] = null;
+        }
+
+        return $this->json(array(
+            'tindak_lanjut' => $item
+        ));
+    }
+    public function update_tindak_lanjut($id = null)
+    {
+        $user = $this->session->userdata('k3rs_user');
+
+        if (!$user) {
+            return $this->json(
+                array('message' => 'Sesi login tidak ditemukan.'),
+                401
+            );
+        }
+
+        if ($user['role'] !== 'admin') {
+            return $this->json(
+                array('message' => 'Akses ditolak.'),
+                403
+            );
+        }
+
+        $tindak_lanjut = $this->Laporan_model
+            ->get_tindak_lanjut_by_id($id);
+
+        if (!$tindak_lanjut) {
+            return $this->json(
+                array('message' => 'Data tindak lanjut tidak ditemukan.'),
+                404
+            );
+        }
+
+        $laporan = $this->Laporan_model
+            ->get_detail_laporan_verifikasi(
+                $tindak_lanjut['laporan_id']
+            );
+
+        if (!$laporan) {
+            return $this->json(
+                array('message' => 'Data laporan tidak ditemukan.'),
+                404
+            );
+        }
+
+        if ($laporan['status'] === 'selesai') {
+            return $this->json(
+                array(
+                    'message' =>
+                    'Tindak lanjut tidak dapat diubah karena laporan sudah selesai.'
+                ),
+                400
+            );
+        }
+
+        $keterangan = trim(
+            $this->input->post('keterangan', true)
+        );
+
+        if (empty($keterangan)) {
+            return $this->json(
+                array('message' => 'Keterangan wajib diisi.'),
+                400
+            );
+        }
+
+        $data_update = array(
+            'keterangan' => $keterangan
+        );
+
+        $foto_baru = null;
+        $foto_lama = $tindak_lanjut['foto'];
+
+        /*
+    |--------------------------------------------------------------------------
+    | Upload foto baru jika ada
+    |--------------------------------------------------------------------------
+    */
+
+        if (
+            isset($_FILES['foto']) &&
+            !empty($_FILES['foto']['name'])
+        ) {
+
+            $config['upload_path'] =
+                FCPATH . 'uploads/verifikasi/';
+
+            $config['allowed_types'] =
+                'jpg|jpeg|png';
+
+            $config['max_size'] = 5120;
+
+            $config['encrypt_name'] = TRUE;
+
+            $this->load->library(
+                'upload',
+                $config
+            );
+
+            if (!$this->upload->do_upload('foto')) {
+                return $this->json(
+                    array(
+                        'message' => strip_tags(
+                            $this->upload->display_errors()
+                        )
+                    ),
+                    400
+                );
+            }
+
+            $upload_data = $this->upload->data();
+
+            $foto_baru =
+                'uploads/verifikasi/' .
+                $upload_data['file_name'];
+
+            $data_update['foto'] = $foto_baru;
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | Update Database
+    |--------------------------------------------------------------------------
+    */
+
+        $result = $this->Laporan_model
+            ->update_tindak_lanjut(
+                $id,
+                $data_update
+            );
+
+        if (!$result) {
+
+            // Hapus foto baru jika database gagal
+            if (
+                $foto_baru &&
+                file_exists(FCPATH . $foto_baru)
+            ) {
+                unlink(FCPATH . $foto_baru);
+            }
+
+            return $this->json(
+                array(
+                    'message' =>
+                    'Gagal memperbarui tindak lanjut.'
+                ),
+                500
+            );
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | Hapus foto lama setelah update berhasil
+    |--------------------------------------------------------------------------
+    */
+
+        if (
+            $foto_baru &&
+            $foto_lama &&
+            file_exists(FCPATH . $foto_lama)
+        ) {
+            unlink(FCPATH . $foto_lama);
+        }
+
+        return $this->json(
+            array(
+                'message' =>
+                'Tindak lanjut berhasil diperbarui.'
+            )
+        );
+    }
 }

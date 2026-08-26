@@ -231,9 +231,8 @@
 
                     <button
                         type="button"
-                        onclick="closeEditTindakLanjut()"
-                        class="text-gray-500 hover:text-gray-700">
-                        <i class="fa-solid fa-xmark text-xl"></i>
+                        data-close-edit-tindak-lanjut>
+                        Batal
                     </button>
                 </div>
 
@@ -273,19 +272,17 @@
                 <div class="flex justify-end gap-3">
                     <button
                         type="button"
-                        onclick="closeEditTindakLanjut()"
-                        class="px-4 py-2 border rounded-lg">
-                        Batal
-                    </button>
+                        data-close-edit-tindak-lanjut
+                        class="text-gray-500 hover:text-gray-700">
 
-                    <button
-                        type="button"
-                        id="btn-update-tindak-lanjut"
-                        class="px-5 py-2 bg-blue-600
+                        <button
+                            type="button"
+                            id="btn-update-tindak-lanjut"
+                            class="px-5 py-2 bg-blue-600
                        hover:bg-blue-700 text-white rounded-lg">
-                        <i class="fa-solid fa-save mr-2"></i>
-                        Simpan Perubahan
-                    </button>
+                            <i class="fa-solid fa-save mr-2"></i>
+                            Simpan Perubahan
+                        </button>
                 </div>
 
             </div>
