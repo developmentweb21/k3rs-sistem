@@ -60,12 +60,39 @@
 		]);
 		document.getElementById("checklist-items").innerHTML = data.checklist
 			.map(function (item, index) {
+				var checklistId = item.id || index + 1;
+				var checklistNama = item.nama || item;
+
 				return (
-					'<label class="flex gap-2 mb-2 text-sm"><input type="checkbox" name="check-' +
-					index +
-					'">' +
-					item +
-					"</label>"
+					'<div class="border border-gray-200 bg-white rounded-lg p-4 mb-3">' +
+					'<div class="font-medium text-gray-800 mb-3">' +
+					(index + 1) +
+					". " +
+					escapeHtml(checklistNama) +
+					"</div>" +
+					'<div class="flex items-center gap-6">' +
+					'<label class="flex items-center gap-2 cursor-pointer">' +
+					'<input type="radio" ' +
+					'name="checklist-' +
+					checklistId +
+					'" ' +
+					'value="yes" required>' +
+					'<span class="text-green-700 font-medium">' +
+					'<i class="fa-solid fa-circle-check mr-1"></i> Ya' +
+					"</span>" +
+					"</label>" +
+					'<label class="flex items-center gap-2 cursor-pointer">' +
+					'<input type="radio" ' +
+					'name="checklist-' +
+					checklistId +
+					'" ' +
+					'value="no">' +
+					'<span class="text-red-600 font-medium">' +
+					'<i class="fa-solid fa-circle-xmark mr-1"></i> Tidak' +
+					"</span>" +
+					"</label>" +
+					"</div>" +
+					"</div>"
 				);
 			})
 			.join("");
@@ -1536,20 +1563,39 @@
 					diagnosa: fields[2].value,
 					hari: fields[3].value,
 				};
-			if (form.dataset.type === "checklist")
+			if (form.dataset.type === "checklist") {
+				var checklistItems = [];
+
+				Array.prototype.slice
+					.call(
+						form.querySelectorAll(
+							'#checklist-items input[type="radio"]:checked',
+						),
+					)
+					.forEach(function (input) {
+						checklistItems.push({
+							checklist_id: input.name.replace("checklist-", ""),
+							jawaban: input.value,
+						});
+					});
+
+				// Pastikan seluruh item sudah dijawab
+				var totalChecklist = form.querySelectorAll(
+					'#checklist-items input[type="radio"][value="yes"]',
+				).length;
+
+				if (checklistItems.length !== totalChecklist) {
+					toast("Silakan jawab semua item checklist terlebih dahulu.");
+					return;
+				}
+
 				payload = {
 					periode: fields[0].value,
 					tanggal: fields[1].value,
 					unit: fields[2].value,
-					items: Array.prototype.slice
-						.call(fields, 3)
-						.filter(function (item) {
-							return item.checked;
-						})
-						.map(function (item) {
-							return item.name;
-						}),
+					items: checklistItems,
 				};
+			}
 			api("transaksi/" + form.dataset.type, payload)
 				.then(function (response) {
 					toast(response.message);
