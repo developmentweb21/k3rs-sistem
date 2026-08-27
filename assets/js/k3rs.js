@@ -43,6 +43,9 @@
 		if (name === "riwayat-insiden") {
 			loadIncidentHistory();
 		}
+		if (name === "riwayat-checklist") {
+			loadChecklistHistory();
+		}
 	}
 	function render() {
 		document.getElementById("sidebar-user-name").textContent = data.user.nama;
@@ -1101,6 +1104,100 @@
 				}
 
 				throw error;
+			});
+	}
+
+	function loadChecklistHistory() {
+		var table = document.getElementById("table-riwayat-checklist");
+
+		if (!table) {
+			return;
+		}
+
+		table.innerHTML =
+			"<tr>" +
+			'<td colspan="6" class="text-center text-gray-400 p-6">' +
+			"Memuat riwayat checklist..." +
+			"</td>" +
+			"</tr>";
+
+		return api("laporan/riwayat-checklist", null, "GET")
+			.then(function (response) {
+				var laporan = response.laporan || [];
+
+				if (!laporan.length) {
+					table.innerHTML =
+						"<tr>" +
+						'<td colspan="6" ' +
+						'class="text-center text-gray-400 p-6">' +
+						"Belum ada riwayat checklist." +
+						"</td>" +
+						"</tr>";
+
+					return;
+				}
+
+				table.innerHTML = laporan
+					.map(function (item) {
+						var jumlahTidakSesuai =
+							Number(item.total_item) - Number(item.jumlah_sesuai);
+
+						return (
+							'<tr class="border-b hover:bg-gray-50">' +
+							'<td class="p-3">' +
+							escapeHtml(item.tanggal_pengisian) +
+							"</td>" +
+							'<td class="p-3">' +
+							escapeHtml(item.periode) +
+							"</td>" +
+							'<td class="p-3">' +
+							escapeHtml(item.unit_kerja) +
+							"</td>" +
+							'<td class="p-3 text-center">' +
+							'<span class="inline-flex px-2 py-1 ' +
+							'rounded bg-green-100 text-green-700">' +
+							item.jumlah_sesuai +
+							"</span>" +
+							"</td>" +
+							'<td class="p-3 text-center">' +
+							'<span class="inline-flex px-2 py-1 ' +
+							'rounded bg-red-100 text-red-700">' +
+							jumlahTidakSesuai +
+							"</span>" +
+							"</td>" +
+							'<td class="p-3 text-center">' +
+							"<button " +
+							'type="button" ' +
+							'class="px-3 py-1.5 rounded-lg ' +
+							'bg-blue-600 text-white hover:bg-blue-700" ' +
+							'data-checklist-detail="' +
+							item.id +
+							'">' +
+							'<i class="fa-solid fa-eye mr-1"></i>' +
+							"Detail" +
+							"</button>" +
+							"</td>" +
+							"</tr>"
+						);
+					})
+					.join("");
+
+				table
+					.querySelectorAll("[data-checklist-detail]")
+					.forEach(function (button) {
+						button.addEventListener("click", function () {
+							loadChecklistDetail(this.dataset.checklistDetail);
+						});
+					});
+			})
+			.catch(function (error) {
+				table.innerHTML =
+					"<tr>" +
+					'<td colspan="6" ' +
+					'class="text-center text-red-600 p-6">' +
+					escapeHtml(error.message) +
+					"</td>" +
+					"</tr>";
 			});
 	}
 	function showEmployeeForm(user) {

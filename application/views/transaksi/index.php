@@ -115,3 +115,50 @@
         </form>
     </div>
 </section>
+<section data-view="riwayat-checklist" class="hidden max-w-5xl mx-auto">
+    <div class="glass p-6 rounded-xl">
+
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-2xl font-bold">
+                    Riwayat Checklist K3
+                </h2>
+                <p class="text-sm text-gray-500">
+                    Daftar checklist K3 yang telah dikirim.
+                </p>
+            </div>
+
+            <button
+                type="button"
+                class="button bg-teal-600"
+                onclick="view('checklist')">
+                <i class="fa-solid fa-plus mr-2"></i>
+                Buat Checklist
+            </button>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="text-left p-3">Tanggal</th>
+                        <th class="text-left p-3">Periode</th>
+                        <th class="text-left p-3">Unit Kerja</th>
+                        <th class="text-center p-3">Sesuai</th>
+                        <th class="text-center p-3">Tidak Sesuai</th>
+                        <th class="text-center p-3">Aksi</th>
+                    </tr>
+                </thead>
+
+                <tbody id="table-riwayat-checklist">
+                    <tr>
+                        <td colspan="6" class="text-center text-gray-400 p-6">
+                            Memuat riwayat checklist...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</section>
