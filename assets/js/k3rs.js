@@ -1200,6 +1200,159 @@
 					"</tr>";
 			});
 	}
+
+	function loadChecklistDetail(id) {
+		var info = document.getElementById("detail-checklist-info");
+
+		var items = document.getElementById("detail-checklist-items");
+
+		if (!info || !items) {
+			return;
+		}
+
+		view("detail-checklist");
+
+		info.innerHTML =
+			'<div class="col-span-2 text-center text-gray-400 py-4">' +
+			"Memuat informasi laporan..." +
+			"</div>";
+
+		items.innerHTML =
+			'<div class="text-center text-gray-400 py-6">' +
+			"Memuat detail checklist..." +
+			"</div>";
+
+		api("laporan/detail-checklist/" + id, null, "GET")
+			.then(function (response) {
+				var laporan = response.laporan;
+
+				if (!laporan) {
+					throw new Error("Data checklist tidak ditemukan.");
+				}
+
+				var jumlahTidakSesuai =
+					Number(laporan.total_item) - Number(laporan.jumlah_sesuai);
+
+				info.innerHTML =
+					'<div class="border rounded-lg p-4">' +
+					'<div class="text-xs text-gray-500 mb-1">' +
+					"Tanggal Pengisian" +
+					"</div>" +
+					'<div class="font-semibold">' +
+					escapeHtml(laporan.tanggal_pengisian || "-") +
+					"</div>" +
+					"</div>" +
+					'<div class="border rounded-lg p-4">' +
+					'<div class="text-xs text-gray-500 mb-1">' +
+					"Periode" +
+					"</div>" +
+					'<div class="font-semibold">' +
+					escapeHtml(laporan.periode || "-") +
+					"</div>" +
+					"</div>" +
+					'<div class="border rounded-lg p-4">' +
+					'<div class="text-xs text-gray-500 mb-1">' +
+					"Unit Kerja" +
+					"</div>" +
+					'<div class="font-semibold">' +
+					escapeHtml(laporan.unit_kerja || "-") +
+					"</div>" +
+					"</div>" +
+					'<div class="border rounded-lg p-4">' +
+					'<div class="text-xs text-gray-500 mb-1">' +
+					"Pengisi" +
+					"</div>" +
+					'<div class="font-semibold">' +
+					escapeHtml(laporan.pelapor || "-") +
+					"</div>" +
+					"</div>" +
+					'<div class="border rounded-lg p-4 bg-green-50">' +
+					'<div class="text-xs text-gray-500 mb-1">' +
+					"Sesuai" +
+					"</div>" +
+					'<div class="font-bold text-green-700 text-xl">' +
+					escapeHtml(laporan.jumlah_sesuai) +
+					"</div>" +
+					"</div>" +
+					'<div class="border rounded-lg p-4 bg-red-50">' +
+					'<div class="text-xs text-gray-500 mb-1">' +
+					"Tidak Sesuai" +
+					"</div>" +
+					'<div class="font-bold text-red-700 text-xl">' +
+					jumlahTidakSesuai +
+					"</div>" +
+					"</div>";
+
+				var detail = laporan.detail || [];
+
+				if (!detail.length) {
+					items.innerHTML =
+						'<div class="text-center text-gray-400 py-6">' +
+						"Tidak ada detail checklist." +
+						"</div>";
+
+					return;
+				}
+
+				items.innerHTML = detail
+					.map(function (item, index) {
+						var isYes = String(item.jawaban).toLowerCase() === "yes";
+
+						var statusClass = isYes
+							? "bg-green-100 text-green-700"
+							: "bg-red-100 text-red-700";
+
+						var statusText = isYes ? "Ya / Sesuai" : "Tidak / Tidak Sesuai";
+
+						var icon = isYes ? "fa-circle-check" : "fa-circle-xmark";
+
+						return (
+							'<div class="border rounded-lg p-4 ' +
+							"flex flex-col md:flex-row " +
+							'md:items-center md:justify-between gap-3">' +
+							'<div class="flex gap-3">' +
+							'<div class="font-semibold text-gray-400">' +
+							(index + 1) +
+							"." +
+							"</div>" +
+							'<div class="text-gray-800">' +
+							escapeHtml(item.nama || "-") +
+							"</div>" +
+							"</div>" +
+							'<span class="inline-flex items-center gap-2 ' +
+							"px-3 py-1.5 rounded-full font-medium " +
+							statusClass +
+							'">' +
+							'<i class="fa-solid ' +
+							icon +
+							'"></i>' +
+							statusText +
+							"</span>" +
+							"</div>"
+						);
+					})
+					.join("");
+			})
+			.catch(function (error) {
+				info.innerHTML = "";
+
+				items.innerHTML =
+					'<div class="text-center text-red-600 py-6">' +
+					escapeHtml(error.message || "Gagal memuat detail checklist.") +
+					"</div>";
+			});
+	}
+
+	var btnKembaliChecklist = document.getElementById(
+		"btn-kembali-riwayat-checklist",
+	);
+
+	if (btnKembaliChecklist) {
+		btnKembaliChecklist.addEventListener("click", function () {
+			view("riwayat-checklist");
+		});
+	}
+
 	function showEmployeeForm(user) {
 		document.getElementById("pegawai-form").reset();
 		document.getElementById("pegawai-id").value = user ? user.id : "";

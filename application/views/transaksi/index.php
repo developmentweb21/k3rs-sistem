@@ -162,3 +162,47 @@
 
     </div>
 </section>
+<section data-view="detail-checklist" class="hidden max-w-4xl mx-auto">
+    <div class="glass p-6 rounded-xl">
+
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-2xl font-bold">
+                    Detail Checklist K3
+                </h2>
+                <p class="text-sm text-gray-500">
+                    Hasil pemeriksaan checklist K3.
+                </p>
+            </div>
+
+            <button
+                type="button"
+                class="button bg-gray-600"
+                id="btn-kembali-riwayat-checklist">
+                <i class="fa-solid fa-arrow-left mr-2"></i>
+                Kembali
+            </button>
+        </div>
+
+        <!-- Informasi laporan -->
+        <div
+            id="detail-checklist-info"
+            class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6"></div>
+
+        <!-- Detail item -->
+        <div>
+            <h3 class="font-semibold text-lg mb-4">
+                Hasil Checklist
+            </h3>
+
+            <div
+                id="detail-checklist-items"
+                class="space-y-3">
+                <div class="text-center text-gray-400 py-6">
+                    Memuat detail checklist...
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
