@@ -1499,18 +1499,26 @@
 
 	function showEmployeeForm(user) {
 		document.getElementById("pegawai-form").reset();
+
 		document.getElementById("pegawai-id").value = user ? user.id : "";
+
 		document.getElementById("pegawai-username").value = user
 			? user.username
 			: "";
+
 		document.getElementById("pegawai-nama").value = user
 			? user.nama_lengkap
 			: "";
+
 		document.getElementById("pegawai-unit").value = user ? user.unit_kerja : "";
-		document.getElementById("pegawai-role").value = user ? user.role : "user";
+
+		// Role mengikuti Master Role
+		document.getElementById("pegawai-role").value = user ? user.role : "";
+
 		document.getElementById("pegawai-form-title").textContent = user
 			? "Ubah Pegawai"
 			: "Tambah Pegawai";
+
 		document.getElementById("pegawai-form-wrapper").classList.remove("hidden");
 	}
 	function editEmployee(id) {
