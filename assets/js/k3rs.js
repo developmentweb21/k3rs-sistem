@@ -107,17 +107,13 @@
 			loadEmployees();
 			loadRoles();
 		}
-		document.getElementById("kpi-total").textContent = data.kpi.total;
-		document.getElementById("kpi-near-miss").textContent = data.kpi.near_miss;
-		document.getElementById("kpi-b3").textContent = data.kpi.b3;
-		document.getElementById("kpi-kepatuhan").textContent =
-			data.kpi.kepatuhan + "%";
+
 		document.querySelectorAll("[data-menu]").forEach(function (el) {
 			el.addEventListener("click", function () {
 				view(el.dataset.menu);
 			});
 		});
-		new Chart(document.getElementById("chart-insiden"), {
+		/* new Chart(document.getElementById("chart-insiden"), {
 			type: "bar",
 			data: {
 				labels: ["Mar", "Apr", "Mei", "Jun", "Jul", "Agu"],
@@ -142,7 +138,7 @@
 					},
 				],
 			},
-		});
+		}); */
 	}
 	function api(path, payload, method) {
 		method = method || "POST";
