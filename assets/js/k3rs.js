@@ -1887,24 +1887,33 @@
 		return;
 	}
 
-	//INI UNTUK LETAK INISIASI
+	// INISIALISASI APLIKASI
 	setupEmployeeCrud();
 	setupMasterCrud();
 	setupMenuCrud();
 	setupRoleCrud();
+
 	render();
+
 	loadMenuManagement();
-	loadIncidentHistory();
+
 	initDashboardFilter();
-	loadDashboard();
+
+	// Dashboard dibuka pertama kali
 	view("dashboard");
-	document.getElementById("logout").addEventListener("click", function () {
-		api("logout").finally(function () {
-			window.location.assign(
-				window.K3RS_HOME_URL.replace("dashboard", "login"),
-			);
+
+	// Event logout
+	var logoutButton = document.getElementById("logout");
+
+	if (logoutButton) {
+		logoutButton.addEventListener("click", function () {
+			api("logout").finally(function () {
+				window.location.assign(
+					window.K3RS_HOME_URL.replace("dashboard", "login"),
+				);
+			});
 		});
-	});
+	}
 	document.querySelectorAll(".report-form").forEach(function (form) {
 		form.addEventListener("submit", function (event) {
 			event.preventDefault();
