@@ -27,7 +27,19 @@
                 <div class="grid grid-cols-6 sm:grid-cols-10 gap-2"><button type="button" class="icon-choice" data-icon="fa-chart-line"><i class="fa-solid fa-chart-line"></i></button><button type="button" class="icon-choice" data-icon="fa-house"><i class="fa-solid fa-house"></i></button><button type="button" class="icon-choice" data-icon="fa-triangle-exclamation"><i class="fa-solid fa-triangle-exclamation"></i></button><button type="button" class="icon-choice" data-icon="fa-notes-medical"><i class="fa-solid fa-notes-medical"></i></button><button type="button" class="icon-choice" data-icon="fa-list-check"><i class="fa-solid fa-list-check"></i></button><button type="button" class="icon-choice" data-icon="fa-clock-rotate-left"><i class="fa-solid fa-clock-rotate-left"></i></button><button type="button" class="icon-choice" data-icon="fa-clipboard-check"><i class="fa-solid fa-clipboard-check"></i></button><button type="button" class="icon-choice" data-icon="fa-users"><i class="fa-solid fa-users"></i></button><button type="button" class="icon-choice" data-icon="fa-user-gear"><i class="fa-solid fa-user-gear"></i></button><button type="button" class="icon-choice" data-icon="fa-database"><i class="fa-solid fa-database"></i></button><button type="button" class="icon-choice" data-icon="fa-file-lines"><i class="fa-solid fa-file-lines"></i></button><button type="button" class="icon-choice" data-icon="fa-folder-open"><i class="fa-solid fa-folder-open"></i></button><button type="button" class="icon-choice" data-icon="fa-building"><i class="fa-solid fa-building"></i></button><button type="button" class="icon-choice" data-icon="fa-shield-halved"><i class="fa-solid fa-shield-halved"></i></button><button type="button" class="icon-choice" data-icon="fa-gear"><i class="fa-solid fa-gear"></i></button><button type="button" class="icon-choice" data-icon="fa-circle"><i class="fa-solid fa-circle"></i></button></div>
             </div>
             <div class="mt-4">
-                <p class="font-semibold text-sm mb-2">Tampilkan untuk peran:</p><label class="mr-5"><input id="menu-role-admin" type="checkbox" value="admin"> Administrator</label><label><input id="menu-role-user" type="checkbox" value="user"> Petugas Unit</label><label class="ml-5"><input id="menu-active" type="checkbox" checked> Aktif</label>
+                <p class="font-semibold text-sm mb-2">
+                    Tampilkan untuk peran:
+                </p>
+
+                <div id="menu-role-list"
+                    class="flex flex-wrap gap-x-5 gap-y-2">
+                    <!-- Role diisi dari Master Role -->
+                </div>
+
+                <label class="inline-flex items-center gap-2 mt-3">
+                    <input id="menu-active" type="checkbox" checked>
+                    Aktif
+                </label>
             </div>
             <div class="mt-5 flex gap-3"><button class="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold">Simpan Menu</button><button id="btn-batal-menu" type="button" class="bg-gray-200 px-4 py-2 rounded-md font-semibold">Batal</button></div>
         </form>

@@ -1120,6 +1120,36 @@
 					"</td></tr>";
 			});
 	}
+	function renderMenuRoles(selectedRoles) {
+		selectedRoles = selectedRoles || [];
+
+		var container = document.getElementById("menu-role-list");
+
+		if (!container) {
+			return;
+		}
+
+		container.innerHTML = roleRows
+			.map(function (role) {
+				var checked = selectedRoles.indexOf(role.kode) !== -1 ? "checked" : "";
+
+				return (
+					'<label class="inline-flex items-center gap-2">' +
+					'<input type="checkbox" ' +
+					'class="menu-role-checkbox" ' +
+					'value="' +
+					escapeHtml(role.kode) +
+					'" ' +
+					checked +
+					">" +
+					"<span>" +
+					escapeHtml(role.nama) +
+					"</span>" +
+					"</label>"
+				);
+			})
+			.join("");
+	}
 	function loadRoles() {
 		return api("master/roles", null, "GET")
 			.then(function (response) {
@@ -1738,6 +1768,7 @@
 	}
 	function showMenuForm(menu) {
 		populateMenuParents(menu);
+
 		document.getElementById("menu-form").reset();
 		document.getElementById("menu-id").value = menu ? menu.id : "";
 		document.getElementById("menu-nama").value = menu ? menu.nama : "";
@@ -1750,12 +1781,14 @@
 				? menu.roles.indexOf(input.dataset.menuRole) !== -1
 				: false;
 		});
+
 		document.getElementById("menu-active").checked = menu
 			? Number(menu.is_active) === 1
 			: true;
 		document.getElementById("menu-form-title").textContent = menu
 			? "Ubah Menu"
 			: "Tambah Menu";
+		renderMenuRoles(menu ? menu.roles : []);
 		document.getElementById("menu-form-wrapper").classList.remove("hidden");
 	}
 	function setMenuIcon(icon) {
@@ -1815,7 +1848,7 @@
 					slug: document.getElementById("menu-slug").value,
 					icon: document.getElementById("menu-icon").value,
 					urutan: document.getElementById("menu-urutan").value,
-					roles: roles,
+					roles: selectedRoles,
 					is_active: document.getElementById("menu-active").checked,
 				})
 					.then(function (response) {
