@@ -153,4 +153,108 @@ class Laporan_model extends CI_Model
             ->where('id', $id)
             ->update('laporan_tindak_lanjut', $data);
     }
+
+    public function get_riwayat_checklist($user)
+    {
+        $this->db->select('
+        laporan_checklist.id,
+        laporan_checklist.periode,
+        laporan_checklist.tanggal_pengisian,
+        laporan_checklist.unit_kerja,
+        laporan_checklist.jumlah_sesuai,
+        laporan_checklist.total_item,
+        laporan_checklist.created_at,
+        users.nama_lengkap AS pelapor
+    ');
+
+        $this->db->from('laporan_checklist');
+
+        $this->db->join(
+            'users',
+            'users.id = laporan_checklist.user_id'
+        );
+
+        // User biasa hanya melihat laporan miliknya
+        if ($user['role'] !== 'admin') {
+            $this->db->where(
+                'laporan_checklist.user_id',
+                $user['id']
+            );
+        }
+
+        $this->db->order_by(
+            'laporan_checklist.created_at',
+            'DESC'
+        );
+
+        return $this->db->get()->result_array();
+    }
+
+
+    public function get_detail_checklist($id, $user)
+    {
+        // Header laporan
+        $this->db->select('
+        laporan_checklist.id,
+        laporan_checklist.periode,
+        laporan_checklist.tanggal_pengisian,
+        laporan_checklist.unit_kerja,
+        laporan_checklist.jumlah_sesuai,
+        laporan_checklist.total_item,
+        laporan_checklist.created_at,
+        users.nama_lengkap AS pelapor
+    ');
+
+        $this->db->from('laporan_checklist');
+
+        $this->db->join(
+            'users',
+            'users.id = laporan_checklist.user_id'
+        );
+
+        $this->db->where('laporan_checklist.id', $id);
+
+        // User biasa hanya boleh melihat miliknya
+        if ($user['role'] !== 'admin') {
+            $this->db->where(
+                'laporan_checklist.user_id',
+                $user['id']
+            );
+        }
+
+        $laporan = $this->db->get()->row_array();
+
+        if (!$laporan) {
+            return null;
+        }
+
+        // Detail jawaban
+        $detail = $this->db
+            ->select('
+            laporan_checklist_detail.id,
+            laporan_checklist_detail.checklist_id,
+            laporan_checklist_detail.jawaban,
+            master_checklist.nama
+        ')
+            ->from('laporan_checklist_detail')
+            ->join(
+                'master_checklist',
+                'master_checklist.id =
+             laporan_checklist_detail.checklist_id'
+            )
+            ->where(
+                'laporan_checklist_detail.laporan_checklist_id',
+                $id
+            )
+            ->order_by(
+                'laporan_checklist_detail.id',
+                'ASC'
+            )
+            ->get()
+            ->result_array();
+
+        $laporan['detail'] = $detail;
+
+        return $laporan;
+    }
 }

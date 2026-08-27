@@ -551,4 +551,55 @@ class Laporan extends CI_Controller
             )
         );
     }
+
+    public function riwayat_checklist()
+    {
+        $user = $this->session->userdata('k3rs_user');
+
+        if (!$user) {
+            return $this->json(
+                array('message' => 'Sesi login tidak ditemukan.'),
+                401
+            );
+        }
+
+        return $this->json(array(
+            'laporan' => $this->Laporan_model
+                ->get_riwayat_checklist($user)
+        ));
+    }
+
+
+    public function detail_checklist($id = null)
+    {
+        $user = $this->session->userdata('k3rs_user');
+
+        if (!$user) {
+            return $this->json(
+                array('message' => 'Sesi login tidak ditemukan.'),
+                401
+            );
+        }
+
+        if (!$id) {
+            return $this->json(
+                array('message' => 'ID laporan checklist tidak ditemukan.'),
+                400
+            );
+        }
+
+        $laporan = $this->Laporan_model
+            ->get_detail_checklist($id, $user);
+
+        if (!$laporan) {
+            return $this->json(
+                array('message' => 'Data checklist tidak ditemukan.'),
+                404
+            );
+        }
+
+        return $this->json(array(
+            'laporan' => $laporan
+        ));
+    }
 }
