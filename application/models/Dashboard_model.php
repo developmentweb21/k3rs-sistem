@@ -151,4 +151,13 @@ class Dashboard_model extends CI_Model
             'kepatuhan' => $kepatuhan
         );
     }
+    public function get_units()
+    {
+        return $this->db
+            ->select('id, nama')
+            ->from('master_unit')
+            ->order_by('nama', 'ASC')
+            ->get()
+            ->result_array();
+    }
 }

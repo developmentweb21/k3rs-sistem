@@ -999,6 +999,36 @@
 			});
 	}
 
+	function loadDashboardUnits() {
+		var unitSelect = document.getElementById("filter-dashboard-unit");
+
+		if (!unitSelect) {
+			return;
+		}
+
+		api("dashboard/units", null, "GET")
+			.then(function (response) {
+				var units = response.data || [];
+
+				unitSelect.innerHTML = '<option value="">Semua Unit</option>';
+
+				units.forEach(function (item) {
+					var option = document.createElement("option");
+
+					// Nilai yang dikirim ke API
+					option.value = item.nama;
+
+					// Nama yang ditampilkan
+					option.textContent = item.nama;
+
+					unitSelect.appendChild(option);
+				});
+			})
+			.catch(function (error) {
+				console.error("Gagal memuat unit dashboard:", error);
+			});
+	}
+
 	function setText(id, value) {
 		var element = document.getElementById(id);
 
@@ -1898,6 +1928,7 @@
 	loadMenuManagement();
 
 	initDashboardFilter();
+	loadDashboardUnits();
 
 	// Dashboard dibuka pertama kali
 	view("dashboard");

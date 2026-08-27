@@ -55,4 +55,23 @@ class Dashboard_api extends CI_Controller
             ->set_content_type('application/json')
             ->set_output(json_encode($data));
     }
+    public function units()
+    {
+        $user = $this->session->userdata('k3rs_user');
+
+        if (!$user) {
+            return $this->json(
+                array(
+                    'message' => 'Sesi login tidak ditemukan.'
+                ),
+                401
+            );
+        }
+
+        $units = $this->Dashboard_model->get_units();
+
+        return $this->json(array(
+            'data' => $units
+        ));
+    }
 }

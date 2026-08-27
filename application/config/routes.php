@@ -53,6 +53,7 @@ $route['default_controller'] = 'dashboard';
 $route['login'] = 'auth';
 $route['api/login'] = 'api/login';
 $route['api/logout'] = 'api/logout';
+$route['api/dashboard/units'] = 'dashboard_api/units';
 $route['api/dashboard'] = 'dashboard_api/index';
 $route['api/master/users'] = 'master/users';
 $route['api/master/users/delete/(:num)'] = 'master/hapus_user/$1';
