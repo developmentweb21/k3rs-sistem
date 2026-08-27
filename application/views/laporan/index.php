@@ -1,27 +1,183 @@
 <section data-view="dashboard">
-    <h2 class="text-2xl font-bold mb-6">KPI Dashboard K3RS</h2>
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <article class="card border-l-4 border-red-500">
-            <p>Total Kejadian K3</p><strong id="kpi-total"></strong>
-        </article>
-        <article class="card border-l-4 border-yellow-500">
-            <p>Near Miss</p><strong id="kpi-near-miss"></strong>
-        </article>
-        <article class="card border-l-4 border-purple-500">
-            <p>Insiden B3</p><strong id="kpi-b3"></strong>
-        </article>
-        <article class="card border-l-4 border-teal-500">
-            <p>Kepatuhan Unit</p><strong id="kpi-kepatuhan"></strong>
-        </article>
-    </div>
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="glass p-5 rounded-xl">
-            <h3 class="font-bold mb-4">Tren Insiden</h3><canvas id="chart-insiden"></canvas>
+
+    <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
+        <div>
+            <h2 class="text-2xl font-bold">Dashboard K3RS</h2>
+            <p class="text-sm text-gray-500">
+                Monitoring laporan Insiden, Kesehatan, dan Checklist K3.
+            </p>
         </div>
-        <div class="glass p-5 rounded-xl">
-            <h3 class="font-bold mb-4">Kategori Insiden</h3><canvas id="chart-kategori"></canvas>
+
+        <button
+            type="button"
+            id="btn-refresh-dashboard"
+            class="button bg-blue-600">
+            <i class="fa-solid fa-rotate-right mr-2"></i>
+            Refresh
+        </button>
+    </div>
+
+
+    <!-- FILTER -->
+    <div class="glass p-5 rounded-xl mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+
+            <div>
+                <label class="block text-sm font-medium mb-2">
+                    Periode
+                </label>
+
+                <input
+                    type="month"
+                    id="filter-dashboard-periode"
+                    class="input w-full">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-2">
+                    Unit Kerja
+                </label>
+
+                <select
+                    id="filter-dashboard-unit"
+                    class="input w-full">
+                    <option value="">Semua Unit</option>
+                </select>
+            </div>
+
+            <div>
+                <button
+                    type="button"
+                    id="btn-filter-dashboard"
+                    class="button bg-teal-600 w-full">
+                    <i class="fa-solid fa-filter mr-2"></i>
+                    Terapkan Filter
+                </button>
+            </div>
+
         </div>
     </div>
+
+
+    <!-- CARD UTAMA -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+
+        <!-- INSIDEN -->
+        <div class="glass rounded-xl p-6 border-l-4 border-red-500">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-sm text-gray-500">
+                        Laporan Insiden
+                    </p>
+
+                    <h3
+                        id="dashboard-insiden-total"
+                        class="text-3xl font-bold mt-2">
+                        0
+                    </h3>
+                </div>
+
+                <div class="text-red-500 text-2xl">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 mt-5 text-center text-sm">
+                <div>
+                    <strong id="dashboard-insiden-menunggu">0</strong>
+                    <p class="text-gray-500">Menunggu</p>
+                </div>
+
+                <div>
+                    <strong id="dashboard-insiden-proses">0</strong>
+                    <p class="text-gray-500">Proses</p>
+                </div>
+
+                <div>
+                    <strong id="dashboard-insiden-selesai">0</strong>
+                    <p class="text-gray-500">Selesai</p>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- KESEHATAN -->
+        <div class="glass rounded-xl p-6 border-l-4 border-blue-500">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-sm text-gray-500">
+                        Laporan Kesehatan
+                    </p>
+
+                    <h3
+                        id="dashboard-kesehatan-total"
+                        class="text-3xl font-bold mt-2">
+                        0
+                    </h3>
+                </div>
+
+                <div class="text-blue-500 text-2xl">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                </div>
+            </div>
+
+            <p class="text-sm text-gray-500 mt-5">
+                Total laporan kesehatan pada periode yang dipilih.
+            </p>
+        </div>
+
+
+        <!-- CHECKLIST -->
+        <div class="glass rounded-xl p-6 border-l-4 border-teal-500">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-sm text-gray-500">
+                        Checklist K3
+                    </p>
+
+                    <h3
+                        id="dashboard-checklist-total"
+                        class="text-3xl font-bold mt-2">
+                        0
+                    </h3>
+                </div>
+
+                <div class="text-teal-500 text-2xl">
+                    <i class="fa-solid fa-clipboard-check"></i>
+                </div>
+            </div>
+
+            <div class="mt-5">
+                <div class="flex justify-between text-sm mb-2">
+                    <span>Kepatuhan</span>
+                    <strong id="dashboard-checklist-kepatuhan">
+                        0%
+                    </strong>
+                </div>
+
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                        id="dashboard-checklist-progress"
+                        class="bg-teal-500 h-2 rounded-full"
+                        style="width: 0%"></div>
+                </div>
+
+                <div class="flex justify-between text-xs text-gray-500 mt-3">
+                    <span>
+                        Sesuai:
+                        <strong id="dashboard-checklist-sesuai">0</strong>
+                    </span>
+
+                    <span>
+                        Tidak Sesuai:
+                        <strong id="dashboard-checklist-tidak-sesuai">0</strong>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
 </section>
 <section data-view="riwayat" class="hidden">
     <h2 class="text-2xl font-bold mb-6">Riwayat Laporan Insiden</h2>

@@ -46,6 +46,9 @@
 		if (name === "riwayat-checklist") {
 			loadChecklistHistory();
 		}
+		if (name === "dashboard") {
+			loadDashboard();
+		}
 	}
 	function render() {
 		document.getElementById("sidebar-user-name").textContent = data.user.nama;
@@ -929,6 +932,114 @@
 			}[char];
 		});
 	}
+
+	//dashboard
+	function loadDashboard() {
+		var periodeInput = document.getElementById("filter-dashboard-periode");
+
+		var unitSelect = document.getElementById("filter-dashboard-unit");
+
+		var periode = periodeInput ? periodeInput.value : "";
+
+		var unit = unitSelect ? unitSelect.value : "";
+
+		var url = "dashboard";
+
+		var params = [];
+
+		if (periode) {
+			params.push("periode=" + encodeURIComponent(periode));
+		}
+
+		if (unit) {
+			params.push("unit=" + encodeURIComponent(unit));
+		}
+
+		if (params.length) {
+			url += "?" + params.join("&");
+		}
+
+		api(url, null, "GET")
+			.then(function (response) {
+				var data = response.data || {};
+
+				var insiden = data.insiden || {};
+				var kesehatan = data.kesehatan || {};
+				var checklist = data.checklist || {};
+
+				setText("dashboard-insiden-total", insiden.total || 0);
+
+				setText("dashboard-insiden-menunggu", insiden.menunggu || 0);
+
+				setText("dashboard-insiden-proses", insiden.proses || 0);
+
+				setText("dashboard-insiden-selesai", insiden.selesai || 0);
+
+				setText("dashboard-kesehatan-total", kesehatan.total || 0);
+
+				setText("dashboard-checklist-total", checklist.total_laporan || 0);
+
+				var kepatuhan = Number(checklist.kepatuhan || 0);
+
+				setText("dashboard-checklist-kepatuhan", kepatuhan + "%");
+
+				setText("dashboard-checklist-sesuai", checklist.sesuai || 0);
+
+				setText(
+					"dashboard-checklist-tidak-sesuai",
+					checklist.tidak_sesuai || 0,
+				);
+
+				var progress = document.getElementById("dashboard-checklist-progress");
+
+				if (progress) {
+					progress.style.width = Math.min(100, Math.max(0, kepatuhan)) + "%";
+				}
+			})
+			.catch(function (error) {
+				console.error("Gagal memuat dashboard:", error);
+
+				showToast(error.message || "Gagal memuat data dashboard.", "error");
+			});
+	}
+
+	function setText(id, value) {
+		var element = document.getElementById(id);
+
+		if (element) {
+			element.textContent = value;
+		}
+	}
+	function initDashboardFilter() {
+		var periode = document.getElementById("filter-dashboard-periode");
+
+		if (periode && !periode.value) {
+			var now = new Date();
+
+			var year = now.getFullYear();
+
+			var month = String(now.getMonth() + 1).padStart(2, "0");
+
+			periode.value = year + "-" + month;
+		}
+	}
+
+	var btnFilterDashboard = document.getElementById("btn-filter-dashboard");
+
+	if (btnFilterDashboard) {
+		btnFilterDashboard.addEventListener("click", function () {
+			loadDashboard();
+		});
+	}
+
+	var btnRefreshDashboard = document.getElementById("btn-refresh-dashboard");
+
+	if (btnRefreshDashboard) {
+		btnRefreshDashboard.addEventListener("click", function () {
+			loadDashboard();
+		});
+	}
+
 	function loadEmployees() {
 		api("master/users", null, "GET")
 			.then(function (response) {
@@ -1779,6 +1890,8 @@
 			});
 		return;
 	}
+
+	//INI UNTUK LETAK INISIASI
 	setupEmployeeCrud();
 	setupMasterCrud();
 	setupMenuCrud();
@@ -1786,6 +1899,8 @@
 	render();
 	loadMenuManagement();
 	loadIncidentHistory();
+	initDashboardFilter();
+	loadDashboard();
 	view("dashboard");
 	document.getElementById("logout").addEventListener("click", function () {
 		api("logout").finally(function () {
