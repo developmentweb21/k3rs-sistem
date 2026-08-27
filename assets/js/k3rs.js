@@ -53,7 +53,7 @@
 	function render() {
 		document.getElementById("sidebar-user-name").textContent = data.user.nama;
 		document.getElementById("sidebar-user-role").textContent =
-			data.user.role === "admin" ? "Administrator" : "Petugas Unit";
+			data.user.role || "-";
 		loadNavigation();
 		document.getElementById("lap-kategori").innerHTML = options(data.kategori);
 		document.getElementById("check-unit").innerHTML = options(data.unit);
@@ -61,8 +61,6 @@
 		document.getElementById("lap-sehat-unit").value = data.user.unit;
 		document.getElementById("lap-sehat-nama").innerHTML = options([
 			data.user.nama,
-			"Siti Aminah",
-			"Budi Santoso",
 		]);
 		document.getElementById("checklist-items").innerHTML = data.checklist
 			.map(function (item, index) {
@@ -104,8 +102,9 @@
 			.join("");
 		if (data.user.role === "admin") {
 			loadMasterData();
-			loadEmployees();
-			loadRoles();
+			loadRoles().then(function () {
+				loadEmployees();
+			});
 		}
 
 		document.querySelectorAll("[data-menu]").forEach(function (el) {
@@ -1066,6 +1065,14 @@
 		});
 	}
 
+	function getRoleName(roleCode) {
+		var role = roleRows.find(function (item) {
+			return item.kode === roleCode;
+		});
+
+		return role ? role.nama : roleCode || "-";
+	}
+
 	function loadEmployees() {
 		api("master/users", null, "GET")
 			.then(function (response) {
@@ -1081,7 +1088,7 @@
 								"</td><td>" +
 								escapeHtml(user.unit_kerja) +
 								'</td><td><span class="badge">' +
-								(user.role === "admin" ? "Administrator" : "Petugas Unit") +
+								getRoleName(user.role) +
 								'</span></td><td class="p-4 text-center whitespace-nowrap"><button class="text-blue-600 mr-3" data-edit-pegawai="' +
 								user.id +
 								'"><i class="fa-solid fa-pen"></i> Edit</button><button class="text-red-600" data-delete-pegawai="' +
@@ -1114,7 +1121,7 @@
 			});
 	}
 	function loadRoles() {
-		api("master/roles", null, "GET")
+		return api("master/roles", null, "GET")
 			.then(function (response) {
 				roleRows = response.roles;
 				document.getElementById("pegawai-role").innerHTML = roleRows
