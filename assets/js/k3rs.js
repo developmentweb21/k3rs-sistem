@@ -1770,25 +1770,28 @@
 		populateMenuParents(menu);
 
 		document.getElementById("menu-form").reset();
+
 		document.getElementById("menu-id").value = menu ? menu.id : "";
+
 		document.getElementById("menu-nama").value = menu ? menu.nama : "";
+
 		document.getElementById("menu-slug").value = menu ? menu.slug : "";
-		setMenuIcon(menu ? menu.icon : "fa-circle");
-		document.getElementById("icon-picker").classList.add("hidden");
+
+		document.getElementById("menu-icon").value = menu ? menu.icon : "";
+
 		document.getElementById("menu-urutan").value = menu ? menu.urutan : 0;
-		document.querySelectorAll("[data-menu-role]").forEach(function (input) {
-			input.checked = menu
-				? menu.roles.indexOf(input.dataset.menuRole) !== -1
-				: false;
-		});
 
 		document.getElementById("menu-active").checked = menu
 			? Number(menu.is_active) === 1
 			: true;
+
 		document.getElementById("menu-form-title").textContent = menu
 			? "Ubah Menu"
 			: "Tambah Menu";
+
+		// Role dinamis dari Master Role
 		renderMenuRoles(menu ? menu.roles : []);
+
 		document.getElementById("menu-form-wrapper").classList.remove("hidden");
 	}
 	function setMenuIcon(icon) {
