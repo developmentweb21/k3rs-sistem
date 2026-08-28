@@ -1,4 +1,5 @@
 <div id="app-container">
+    <div id="sidebar-backdrop" class="sidebar-backdrop hidden"></div>
     <aside id="desktop-sidebar" class="glass-sidebar sidebar fixed h-full text-white flex flex-col justify-between">
         <div>
             <div class="sidebar-brand">
@@ -18,6 +19,9 @@
         </div>
         <div class="sidebar-footer"><button id="logout" class="logout-button"><i class="fa-solid fa-right-from-bracket"></i> Keluar dari sistem</button></div>
     </aside>
+    <button id="sidebar-toggle" class="sidebar-toggle" type="button" title="Tampilkan/sembunyikan sidebar" aria-label="Tampilkan atau sembunyikan sidebar">
+        <i class="fa-solid fa-bars"></i>
+    </button>
     <main id="main-content" class="ml-64 p-4 md:p-8 min-h-screen">
         <?php $this->load->view('laporan/index'); ?>
         <?php $this->load->view('transaksi/index'); ?>

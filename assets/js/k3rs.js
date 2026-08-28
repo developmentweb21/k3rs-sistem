@@ -33,8 +33,12 @@
 		});
 
 		document.querySelectorAll("[data-menu]").forEach(function (el) {
-			el.classList.toggle("bg-blue-800", el.dataset.menu === name);
-			el.classList.toggle("active", el.dataset.menu === name);
+			var isActive = el.dataset.menu === name;
+			el.classList.toggle(
+				"bg-blue-800",
+				isActive && el.classList.contains("menu-button"),
+			);
+			el.classList.toggle("active", isActive);
 		});
 
 		if (name === "verifikasi") {
@@ -50,6 +54,8 @@
 		if (name === "dashboard") {
 			loadDashboard();
 		}
+
+		setMobileSidebar(false);
 	}
 	function render() {
 		document.getElementById("sidebar-user-name").textContent = data.user.nama;
@@ -230,6 +236,57 @@
 			});
 		});
 	}
+	function logoutCurrentUser() {
+		api("logout").finally(function () {
+			window.location.assign(window.K3RS_HOME_URL.replace("dashboard", "login"));
+		});
+	}
+	function setMobileSidebar(isOpen) {
+		document.body.classList.toggle("mobile-sidebar-open", isOpen);
+		var backdrop = document.getElementById("sidebar-backdrop");
+		if (backdrop) {
+			backdrop.classList.toggle("hidden", !isOpen);
+		}
+	}
+	function toggleSidebar() {
+		if (window.matchMedia("(max-width: 768px)").matches) {
+			setMobileSidebar(!document.body.classList.contains("mobile-sidebar-open"));
+			return;
+		}
+		document.body.classList.toggle("sidebar-hidden");
+	}
+	function setupResponsiveSidebar() {
+		var sidebarToggle = document.getElementById("sidebar-toggle");
+		var sidebarBackdrop = document.getElementById("sidebar-backdrop");
+		var bottomNav = document.getElementById("bottom-nav");
+
+		if (sidebarToggle) {
+			sidebarToggle.addEventListener("click", toggleSidebar);
+		}
+
+		if (sidebarBackdrop) {
+			sidebarBackdrop.addEventListener("click", function () {
+				setMobileSidebar(false);
+			});
+		}
+
+		if (bottomNav) {
+			bottomNav.addEventListener("click", function (event) {
+				var target = event.target.nodeType === 1 ? event.target : event.target.parentElement;
+				var action = target ? target.closest("[data-bottom-action]") : null;
+				if (!action) return;
+
+				if (action.dataset.bottomAction === "menu") {
+					toggleSidebar();
+					return;
+				}
+
+				if (action.dataset.bottomAction === "logout") {
+					logoutCurrentUser();
+				}
+			});
+		}
+	}
 	function loadNavigation() {
 		api("master/menu/navigasi", null, "GET")
 			.then(function (response) {
@@ -305,6 +362,16 @@
 				});
 
 				document.getElementById("nav-menu").innerHTML = html;
+				document.getElementById("bottom-nav").innerHTML =
+					'<button type="button" class="bottom-action" data-menu="dashboard">' +
+					'<i class="fa-solid fa-house"></i><span>Dashboard</span>' +
+					"</button>" +
+					'<button type="button" class="bottom-action" data-bottom-action="menu">' +
+					'<i class="fa-solid fa-bars"></i><span>Menu</span>' +
+					"</button>" +
+					'<button type="button" class="bottom-action logout" data-bottom-action="logout">' +
+					'<i class="fa-solid fa-right-from-bracket"></i><span>Keluar</span>' +
+					"</button>";
 
 				/*
 				 * Event dropdown
@@ -2198,6 +2265,7 @@
 	setupMasterCrud();
 	setupMenuCrud();
 	setupRoleCrud();
+	setupResponsiveSidebar();
 
 	render();
 
@@ -2213,13 +2281,7 @@
 	var logoutButton = document.getElementById("logout");
 
 	if (logoutButton) {
-		logoutButton.addEventListener("click", function () {
-			api("logout").finally(function () {
-				window.location.assign(
-					window.K3RS_HOME_URL.replace("dashboard", "login"),
-				);
-			});
-		});
+		logoutButton.addEventListener("click", logoutCurrentUser);
 	}
 	document.querySelectorAll(".report-form").forEach(function (form) {
 		form.addEventListener("submit", function (event) {
