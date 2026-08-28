@@ -50,6 +50,23 @@ class Master_model extends CI_Model
             ->where('menu_roles.role', $role)->where('menus.is_active', 1)
             ->order_by('menus.urutan')->get()->result_array();
     }
+    public function role_has_menu_access($role, $slug)
+    {
+        if (empty($role) || empty($slug)) {
+            return FALSE;
+        }
+
+        return $this->db
+            ->from('menus')
+            ->join(
+                'menu_roles',
+                'menu_roles.menu_id = menus.id'
+            )
+            ->where('menu_roles.role', $role)
+            ->where('menus.slug', $slug)
+            ->where('menus.is_active', 1)
+            ->count_all_results() > 0;
+    }
     public function get_menus()
     {
         $menus = $this->db->select(

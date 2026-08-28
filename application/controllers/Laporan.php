@@ -9,6 +9,36 @@ class Laporan extends CI_Controller
         $this->load->model('Master_model');
         $this->load->model('Laporan_model');
     }
+    private function require_menu_access($menuSlug)
+    {
+        $user = $this->session->userdata('k3rs_user');
+
+        if (!$user) {
+            $this->json(
+                array('message' => 'Sesi login tidak ditemukan.'),
+                401
+            );
+            return FALSE;
+        }
+
+        if (
+            empty($user['role']) ||
+            !$this->Master_model->role_has_menu_access(
+                $user['role'],
+                $menuSlug
+            )
+        ) {
+            $this->json(
+                array(
+                    'message' => 'Anda tidak memiliki akses ke menu ini.'
+                ),
+                403
+            );
+            return FALSE;
+        }
+
+        return $user;
+    }
 
     public function data_awal()
     {
@@ -29,25 +59,14 @@ class Laporan extends CI_Controller
     }
     public function verifikasi()
     {
-        $user = $this->session->userdata('k3rs_user');
+        $user = $this->require_menu_access('verifikasi');
 
         if (!$user) {
-            return $this->json(
-                array('message' => 'Sesi login tidak ditemukan.'),
-                401
-            );
-        }
-
-        if ($user['role'] !== 'admin') {
-            return $this->json(
-                array('message' => 'Akses ditolak.'),
-                403
-            );
+            return;
         }
 
         $status = $this->input->get('status', true);
 
-        // Validasi status
         $allowed_status = array(
             'menunggu',
             'diproses',
@@ -70,20 +89,11 @@ class Laporan extends CI_Controller
     }
     public function detail_verifikasi($id = null)
     {
-        $user = $this->session->userdata('k3rs_user');
+
+        $user = $this->require_menu_access('verifikasi');
 
         if (!$user) {
-            return $this->json(
-                array('message' => 'Sesi login tidak ditemukan.'),
-                401
-            );
-        }
-
-        if ($user['role'] !== 'admin') {
-            return $this->json(
-                array('message' => 'Akses ditolak.'),
-                403
-            );
+            return;
         }
 
         if (!$id) {
