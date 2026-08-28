@@ -177,6 +177,86 @@
         </div>
 
     </div>
+    <!-- KEPATUHAN PELAPORAN UNIT -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+
+        <!-- RINGKASAN -->
+        <div class="glass rounded-xl p-6">
+
+            <h3 class="font-bold text-lg mb-5">
+                <i class="fa-solid fa-building-circle-check text-teal-600 mr-2"></i>
+                Kepatuhan Pelaporan Unit
+            </h3>
+
+            <div class="text-center mb-6">
+                <div
+                    id="dashboard-unit-persentase"
+                    class="text-4xl font-bold text-teal-600">
+                    0%
+                </div>
+
+                <p class="text-sm text-gray-500 mt-2">
+                    Unit yang sudah melapor
+                </p>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3 text-center">
+
+                <div>
+                    <strong
+                        id="dashboard-unit-total"
+                        class="text-lg">
+                        0
+                    </strong>
+
+                    <p class="text-xs text-gray-500">
+                        Total Unit
+                    </p>
+                </div>
+
+                <div>
+                    <strong
+                        id="dashboard-unit-sudah"
+                        class="text-lg text-green-600">
+                        0
+                    </strong>
+
+                    <p class="text-xs text-gray-500">
+                        Sudah Lapor
+                    </p>
+                </div>
+
+                <div>
+                    <strong
+                        id="dashboard-unit-belum"
+                        class="text-lg text-red-600">
+                        0
+                    </strong>
+
+                    <p class="text-xs text-gray-500">
+                        Belum Lapor
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- CHART -->
+        <div class="glass rounded-xl p-6 lg:col-span-2">
+
+            <h3 class="font-bold text-lg mb-5">
+                <i class="fa-solid fa-chart-column text-blue-600 mr-2"></i>
+                Status Pelaporan Checklist per Unit
+            </h3>
+
+            <div style="height: 320px">
+                <canvas id="chart-kepatuhan-unit"></canvas>
+            </div>
+
+        </div>
+
+    </div>
 
 </section>
 <section data-view="riwayat" class="hidden">

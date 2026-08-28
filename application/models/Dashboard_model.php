@@ -8,10 +8,83 @@ class Dashboard_model extends CI_Model
         return array(
             'insiden' => $this->get_insiden($periode, $unit),
             'kesehatan' => $this->get_kesehatan($periode, $unit),
-            'checklist' => $this->get_checklist($periode, $unit)
+            'checklist' => $this->get_checklist($periode, $unit),
+
+            // Kepatuhan unit melakukan pelaporan checklist
+            'kepatuhan_unit' => $this->get_kepatuhan_unit(
+                $periode,
+                $unit
+            )
         );
     }
+    private function get_kepatuhan_unit($periode = null, $unit = null)
+    {
+        $sql = '
+        SELECT
+            u.id,
+            u.nama,
+            CASE
+                WHEN EXISTS (
+                    SELECT 1
+                    FROM laporan_checklist lc
+                    WHERE lc.unit_kerja = u.nama
+    ';
 
+        $params = array();
+
+        // Filter periode checklist
+        if (!empty($periode)) {
+            $sql .= ' AND lc.periode = ?';
+            $params[] = $periode;
+        }
+
+        $sql .= '
+                )
+                THEN 1
+                ELSE 0
+            END AS sudah_lapor
+        FROM master_unit u
+    ';
+
+        // Jika filter unit dipilih
+        if (!empty($unit)) {
+            $sql .= ' WHERE u.nama = ?';
+            $params[] = $unit;
+        }
+
+        $sql .= ' ORDER BY u.nama ASC';
+
+        $units = $this->db
+            ->query($sql, $params)
+            ->result_array();
+
+        $sudahLapor = 0;
+        $belumLapor = 0;
+
+        foreach ($units as &$item) {
+            $item['sudah_lapor'] = (int) $item['sudah_lapor'];
+
+            if ($item['sudah_lapor']) {
+                $sudahLapor++;
+            } else {
+                $belumLapor++;
+            }
+        }
+
+        $totalUnit = count($units);
+
+        $persentase = $totalUnit > 0
+            ? round(($sudahLapor / $totalUnit) * 100, 2)
+            : 0;
+
+        return array(
+            'total_unit' => $totalUnit,
+            'sudah_lapor' => $sudahLapor,
+            'belum_lapor' => $belumLapor,
+            'persentase' => $persentase,
+            'units' => $units
+        );
+    }
 
     private function get_insiden($periode = null, $unit = null)
     {

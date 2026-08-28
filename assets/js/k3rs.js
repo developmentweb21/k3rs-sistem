@@ -4,6 +4,7 @@
 	var employeeRows = [];
 	var menuRows = [];
 	var roleRows = [];
+	var chartKepatuhanUnit = null;
 
 	// Menyimpan status filter Verifikasi yang sedang aktif
 	var currentVerificationStatus = "";
@@ -113,32 +114,97 @@
 				view(el.dataset.menu);
 			});
 		});
-		/* new Chart(document.getElementById("chart-insiden"), {
-			type: "bar",
-			data: {
-				labels: ["Mar", "Apr", "Mei", "Jun", "Jul", "Agu"],
-				datasets: [
-					{
-						label: "Insiden",
-						data: [2, 4, 1, 5, 2, 3],
-						backgroundColor: "#3b82f6",
-						borderRadius: 4,
+		function renderKepatuhanUnit(dataUnit) {
+			var units = dataUnit.units || [];
+
+			setText("dashboard-unit-total", dataUnit.total_unit || 0);
+
+			setText("dashboard-unit-sudah", dataUnit.sudah_lapor || 0);
+
+			setText("dashboard-unit-belum", dataUnit.belum_lapor || 0);
+
+			setText(
+				"dashboard-unit-persentase",
+				Number(dataUnit.persentase || 0) + "%",
+			);
+
+			var canvas = document.getElementById("chart-kepatuhan-unit");
+
+			if (!canvas || typeof Chart === "undefined") {
+				return;
+			}
+
+			// Hindari chart bertumpuk saat filter diubah
+			if (chartKepatuhanUnit) {
+				chartKepatuhanUnit.destroy();
+				chartKepatuhanUnit = null;
+			}
+
+			var labels = units.map(function (item) {
+				return item.nama;
+			});
+
+			var values = units.map(function (item) {
+				return Number(item.sudah_lapor) === 1 ? 1 : 0;
+			});
+
+			var colors = units.map(function (item) {
+				return Number(item.sudah_lapor) === 1 ? "#10b981" : "#ef4444";
+			});
+
+			chartKepatuhanUnit = new Chart(canvas, {
+				type: "bar",
+
+				data: {
+					labels: labels,
+
+					datasets: [
+						{
+							label: "Status Kepatuhan Pelaporan",
+							data: values,
+							backgroundColor: colors,
+							borderRadius: 6,
+						},
+					],
+				},
+
+				options: {
+					responsive: true,
+					maintainAspectRatio: false,
+
+					scales: {
+						y: {
+							beginAtZero: true,
+							max: 1,
+
+							ticks: {
+								stepSize: 1,
+
+								callback: function (value) {
+									return Number(value) === 1 ? "Sudah Lapor" : "Belum Lapor";
+								},
+							},
+						},
 					},
-				],
-			},
-		});
-		new Chart(document.getElementById("chart-kategori"), {
-			type: "doughnut",
-			data: {
-				labels: ["Near Miss", "Accident Man", "Laka Lantas", "B3"],
-				datasets: [
-					{
-						data: [4, 3, 2, 1],
-						backgroundColor: ["#3b82f6", "#f59e0b", "#ef4444", "#10b981"],
+
+					plugins: {
+						legend: {
+							display: false,
+						},
+
+						tooltip: {
+							callbacks: {
+								label: function (context) {
+									return context.raw === 1
+										? "Sudah melakukan pelaporan"
+										: "Belum melakukan pelaporan";
+								},
+							},
+						},
 					},
-				],
-			},
-		}); */
+				},
+			});
+		}
 	}
 	function api(path, payload, method) {
 		method = method || "POST";
@@ -962,6 +1028,7 @@
 				var insiden = data.insiden || {};
 				var kesehatan = data.kesehatan || {};
 				var checklist = data.checklist || {};
+				var kepatuhanUnit = data.kepatuhan_unit || {};
 
 				setText("dashboard-insiden-total", insiden.total || 0);
 
@@ -991,6 +1058,7 @@
 				if (progress) {
 					progress.style.width = Math.min(100, Math.max(0, kepatuhan)) + "%";
 				}
+				renderKepatuhanUnit(kepatuhanUnit);
 			})
 			.catch(function (error) {
 				console.error("Gagal memuat dashboard:", error);
