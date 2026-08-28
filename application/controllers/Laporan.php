@@ -49,9 +49,15 @@ class Laporan extends CI_Controller
 
     public function riwayat()
     {
-        $user = $this->session->userdata('k3rs_user');
-        if (!$user) return $this->json(array('message' => 'Sesi login tidak ditemukan.'), 401);
-        return $this->json(array('laporan' => $this->Laporan_model->get_riwayat_insiden($user)));
+        $user = $this->require_menu_access('riwayat');
+
+        if (!$user) {
+            return;
+        }
+
+        return $this->json(array(
+            'laporan' => $this->Laporan_model->get_riwayat_insiden($user)
+        ));
     }
     private function json($data, $status = 200)
     {
@@ -564,13 +570,10 @@ class Laporan extends CI_Controller
 
     public function riwayat_checklist()
     {
-        $user = $this->session->userdata('k3rs_user');
+        $user = $this->require_menu_access('riwayat');
 
         if (!$user) {
-            return $this->json(
-                array('message' => 'Sesi login tidak ditemukan.'),
-                401
-            );
+            return;
         }
 
         return $this->json(array(

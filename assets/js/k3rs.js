@@ -40,7 +40,7 @@
 			loadVerification(currentVerificationStatus);
 		}
 
-		if (name === "riwayat-insiden") {
+		if (name === "riwayat") {
 			loadIncidentHistory();
 		}
 		if (name === "riwayat-checklist") {
