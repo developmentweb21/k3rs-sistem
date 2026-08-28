@@ -1767,9 +1767,8 @@
 			});
 	}
 	function showMenuForm(menu) {
-		populateMenuParents(menu);
-
 		document.getElementById("menu-form").reset();
+		populateMenuParents(menu);
 
 		document.getElementById("menu-id").value = menu ? menu.id : "";
 
@@ -1814,73 +1813,112 @@
 			});
 	}
 	function setupMenuCrud() {
-		document
-			.getElementById("btn-tambah-menu")
-			.addEventListener("click", function () {
+		var btnTambahMenu = document.getElementById("btn-tambah-menu");
+		var btnBatalMenu = document.getElementById("btn-batal-menu");
+		var btnPilihIcon = document.getElementById("btn-pilih-icon");
+		var menuForm = document.getElementById("menu-form");
+
+		if (btnTambahMenu) {
+			btnTambahMenu.addEventListener("click", function () {
 				showMenuForm(null);
 			});
-		document
-			.getElementById("btn-batal-menu")
-			.addEventListener("click", function () {
+		}
+
+		if (btnBatalMenu) {
+			btnBatalMenu.addEventListener("click", function () {
 				document.getElementById("menu-form-wrapper").classList.add("hidden");
 			});
-		document
-			.getElementById("btn-pilih-icon")
-			.addEventListener("click", function () {
-				document.getElementById("icon-picker").classList.toggle("hidden");
+		}
+
+		if (btnPilihIcon) {
+			btnPilihIcon.addEventListener("click", function () {
+				var iconPicker = document.getElementById("icon-picker");
+
+				if (iconPicker) {
+					iconPicker.classList.toggle("hidden");
+				}
 			});
+		}
+
 		document.querySelectorAll(".icon-choice").forEach(function (button) {
 			button.addEventListener("click", function () {
 				setMenuIcon(button.dataset.icon);
-				document.getElementById("icon-picker").classList.add("hidden");
+
+				var iconPicker = document.getElementById("icon-picker");
+
+				if (iconPicker) {
+					iconPicker.classList.add("hidden");
+				}
 			});
 		});
-		document
-			.getElementById("menu-form")
-			.addEventListener("submit", function (event) {
+
+		if (menuForm) {
+			menuForm.addEventListener("submit", function (event) {
 				event.preventDefault();
-				var roles = Array.prototype.slice
-					.call(document.querySelectorAll("[data-menu-role]:checked"))
+
+				// Ambil semua role dinamis yang dicentang
+				var selectedRoles = Array.prototype.slice
+					.call(document.querySelectorAll(".menu-role-checkbox:checked"))
 					.map(function (input) {
-						return input.dataset.menuRole;
+						return input.value;
 					});
+
 				api("master/menu", {
 					id: document.getElementById("menu-id").value,
+
 					parent_id: document.getElementById("menu-parent-id").value,
+
 					nama: document.getElementById("menu-nama").value,
+
 					slug: document.getElementById("menu-slug").value,
+
 					icon: document.getElementById("menu-icon").value,
+
 					urutan: document.getElementById("menu-urutan").value,
+
+					// Role dari Master Role
 					roles: selectedRoles,
+
 					is_active: document.getElementById("menu-active").checked,
 				})
 					.then(function (response) {
 						toast(response.message);
+
 						document
 							.getElementById("menu-form-wrapper")
 							.classList.add("hidden");
+
 						loadMenuManagement();
+
 						loadNavigation();
 					})
+
 					.catch(function (error) {
 						toast(error.message);
 					});
 			});
+		}
 	}
 	function populateMenuParents(menu) {
 		var select = document.getElementById("menu-parent-id");
+
+		if (!select) {
+			return;
+		}
+
 		var currentId = menu ? String(menu.id) : "";
 
 		select.innerHTML =
 			'<option value="">-- Menu Utama --</option>' +
 			menuRows
 				.filter(function (item) {
-					return !item.parent_id && String(item.id) !== currentId;
+					// Jangan tampilkan menu itu sendiri
+					return String(item.id) !== currentId;
 				})
 				.map(function (item) {
 					return (
 						'<option value="' +
-						item.id +
+						escapeHtml(item.id) +
 						'">' +
 						escapeHtml(item.nama) +
 						"</option>"
@@ -1888,7 +1926,10 @@
 				})
 				.join("");
 
-		select.value = menu && menu.parent_id ? menu.parent_id : "";
+		// Saat edit, pilih induk yang tersimpan
+		if (menu && menu.parent_id) {
+			select.value = menu.parent_id;
+		}
 	}
 	function showRoleForm(role) {
 		document.getElementById("role-form").reset();

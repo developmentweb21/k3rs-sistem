@@ -78,7 +78,13 @@ class Master_model extends CI_Model
         if ($id) $this->db->where('id !=', $id);
         if ($this->db->count_all_results('menus') > 0)
             return array('success' => FALSE, 'message' => 'Slug menu sudah digunakan.');
-        if ($parentId === $id) return array('success' => FALSE, 'message' => 'Menu tidak dapat menjadi induk dirinya sendiri.');
+        // Validasi hanya berlaku saat mengedit menu yang sudah ada
+        if ($id > 0 && $parentId > 0 && $parentId === $id) {
+            return array(
+                'success' => FALSE,
+                'message' => 'Menu tidak dapat menjadi induk dirinya sendiri.'
+            );
+        }
         if ($parentId && !$this->db->where('id', $parentId)->count_all_results('menus'))
             return array('success' => FALSE, 'message' => 'Menu induk tidak ditemukan.');
         $record = array(
