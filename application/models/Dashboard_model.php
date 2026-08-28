@@ -101,7 +101,7 @@ class Dashboard_model extends CI_Model
 
             SUM(
                 CASE
-                    WHEN laporan_insiden.status = "proses"
+                    WHEN laporan_insiden.status = "diproses"
                     THEN 1
                     ELSE 0
                 END

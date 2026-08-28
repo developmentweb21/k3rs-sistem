@@ -114,98 +114,100 @@
 				view(el.dataset.menu);
 			});
 		});
-		function renderKepatuhanUnit(dataUnit) {
-			var units = dataUnit.units || [];
-
-			setText("dashboard-unit-total", dataUnit.total_unit || 0);
-
-			setText("dashboard-unit-sudah", dataUnit.sudah_lapor || 0);
-
-			setText("dashboard-unit-belum", dataUnit.belum_lapor || 0);
-
-			setText(
-				"dashboard-unit-persentase",
-				Number(dataUnit.persentase || 0) + "%",
-			);
-
-			var canvas = document.getElementById("chart-kepatuhan-unit");
-
-			if (!canvas || typeof Chart === "undefined") {
-				return;
-			}
-
-			// Hindari chart bertumpuk saat filter diubah
-			if (chartKepatuhanUnit) {
-				chartKepatuhanUnit.destroy();
-				chartKepatuhanUnit = null;
-			}
-
-			var labels = units.map(function (item) {
-				return item.nama;
-			});
-
-			var values = units.map(function (item) {
-				return Number(item.sudah_lapor) === 1 ? 1 : 0;
-			});
-
-			var colors = units.map(function (item) {
-				return Number(item.sudah_lapor) === 1 ? "#10b981" : "#ef4444";
-			});
-
-			chartKepatuhanUnit = new Chart(canvas, {
-				type: "bar",
-
-				data: {
-					labels: labels,
-
-					datasets: [
-						{
-							label: "Status Kepatuhan Pelaporan",
-							data: values,
-							backgroundColor: colors,
-							borderRadius: 6,
-						},
-					],
-				},
-
-				options: {
-					responsive: true,
-					maintainAspectRatio: false,
-
-					scales: {
-						y: {
-							beginAtZero: true,
-							max: 1,
-
-							ticks: {
-								stepSize: 1,
-
-								callback: function (value) {
-									return Number(value) === 1 ? "Sudah Lapor" : "Belum Lapor";
-								},
-							},
-						},
-					},
-
-					plugins: {
-						legend: {
-							display: false,
-						},
-
-						tooltip: {
-							callbacks: {
-								label: function (context) {
-									return context.raw === 1
-										? "Sudah melakukan pelaporan"
-										: "Belum melakukan pelaporan";
-								},
-							},
-						},
-					},
-				},
-			});
-		}
 	}
+
+	function renderKepatuhanUnit(dataUnit) {
+		var units = dataUnit.units || [];
+
+		setText("dashboard-unit-total", dataUnit.total_unit || 0);
+
+		setText("dashboard-unit-sudah", dataUnit.sudah_lapor || 0);
+
+		setText("dashboard-unit-belum", dataUnit.belum_lapor || 0);
+
+		setText(
+			"dashboard-unit-persentase",
+			Number(dataUnit.persentase || 0) + "%",
+		);
+
+		var canvas = document.getElementById("chart-kepatuhan-unit");
+
+		if (!canvas || typeof Chart === "undefined") {
+			return;
+		}
+
+		// Hindari chart bertumpuk saat filter diubah
+		if (chartKepatuhanUnit) {
+			chartKepatuhanUnit.destroy();
+			chartKepatuhanUnit = null;
+		}
+
+		var labels = units.map(function (item) {
+			return item.nama;
+		});
+
+		var values = units.map(function (item) {
+			return Number(item.sudah_lapor) === 1 ? 1 : 0;
+		});
+
+		var colors = units.map(function (item) {
+			return Number(item.sudah_lapor) === 1 ? "#10b981" : "#ef4444";
+		});
+
+		chartKepatuhanUnit = new Chart(canvas, {
+			type: "bar",
+
+			data: {
+				labels: labels,
+
+				datasets: [
+					{
+						label: "Status Kepatuhan Pelaporan",
+						data: values,
+						backgroundColor: colors,
+						borderRadius: 6,
+					},
+				],
+			},
+
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+
+				scales: {
+					y: {
+						beginAtZero: true,
+						max: 1,
+
+						ticks: {
+							stepSize: 1,
+
+							callback: function (value) {
+								return Number(value) === 1 ? "Sudah Lapor" : "Belum Lapor";
+							},
+						},
+					},
+				},
+
+				plugins: {
+					legend: {
+						display: false,
+					},
+
+					tooltip: {
+						callbacks: {
+							label: function (context) {
+								return context.raw === 1
+									? "Sudah melakukan pelaporan"
+									: "Belum melakukan pelaporan";
+							},
+						},
+					},
+				},
+			},
+		});
+	}
+
 	function api(path, payload, method) {
 		method = method || "POST";
 		var request = {
@@ -1063,7 +1065,7 @@
 			.catch(function (error) {
 				console.error("Gagal memuat dashboard:", error);
 
-				showToast(error.message || "Gagal memuat data dashboard.", "error");
+				toast(error.message || "Gagal memuat data dashboard.");
 			});
 	}
 
