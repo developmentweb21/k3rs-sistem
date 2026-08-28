@@ -11,7 +11,7 @@
             <label class="block text-sm text-gray-600 text-left mt-2 mb-4">
                 <input id="show-pass" type="checkbox" class="mr-2">Lihat Password</label>
             <button class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700">Masuk Sistem</button>
-            <p class="mt-4 text-xs text-gray-400">@2026 by Saleh Mahmud, S.Kom</p>
+            <p class="mt-4 app-credit login-credit">2026 by saleh mahmud</p>
         </form>
     </div>
 </section>

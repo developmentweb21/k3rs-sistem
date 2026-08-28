@@ -64,6 +64,7 @@ $route['api/master/roles'] = 'master/roles';
 $route['api/master/roles/delete/(:num)'] = 'master/hapus_role/$1';
 $route['api/master/(:any)'] = 'master/data/$1';
 $route['api/master/(:any)/delete/(:num)'] = 'master/hapus_data/$1/$2';
+$route['api/transaksi/karyawan-unit'] = 'transaksi/karyawan_unit';
 $route['api/transaksi/(:any)'] = 'transaksi/simpan/$1';
 $route['api/laporan/data-awal'] = 'laporan/data_awal';
 $route['api/laporan/verifikasi'] = 'laporan/verifikasi';

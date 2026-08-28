@@ -18,6 +18,17 @@ class Transaksi extends CI_Controller
             return $this->json(array('message' => 'Jenis laporan tidak valid.'), 422);
         return $this->json(array('message' => 'Data berhasil disimpan'));
     }
+
+    public function karyawan_unit()
+    {
+        $user = $this->session->userdata('k3rs_user');
+        if (!$user) return $this->json(array('message' => 'Sesi login tidak ditemukan.'), 401);
+
+        return $this->json(array(
+            'karyawan' => $this->Transaksi_model->get_karyawan_by_unit($user['unit'])
+        ));
+    }
+
     private function json($data, $status = 200)
     {
         return $this->output->set_status_header($status)->set_content_type('application/json')->set_output(json_encode($data));

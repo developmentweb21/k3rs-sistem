@@ -3,6 +3,22 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Transaksi_model extends CI_Model
 {
+    public function get_karyawan_by_unit($unit)
+    {
+        if (empty($unit)) {
+            return array();
+        }
+
+        return $this->db
+            ->select('id, nama_lengkap, unit_kerja')
+            ->from('users')
+            ->where('unit_kerja', $unit)
+            ->where('is_active', 1)
+            ->order_by('nama_lengkap', 'ASC')
+            ->get()
+            ->result_array();
+    }
+
     public function save($jenis, $data, $user)
     {
         if ($jenis === 'insiden') return $this->db->insert(

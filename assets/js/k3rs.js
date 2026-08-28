@@ -67,9 +67,7 @@
 		document.getElementById("check-unit").innerHTML = options(data.unit);
 		document.getElementById("pegawai-unit").innerHTML = options(data.unit);
 		document.getElementById("lap-sehat-unit").value = data.user.unit;
-		document.getElementById("lap-sehat-nama").innerHTML = options([
-			data.user.nama,
-		]);
+		loadKaryawanKesehatan();
 		document.getElementById("checklist-items").innerHTML = data.checklist
 			.map(function (item, index) {
 				var checklistId = item.id || index + 1;
@@ -1163,6 +1161,39 @@
 			})
 			.catch(function (error) {
 				console.error("Gagal memuat unit dashboard:", error);
+			});
+	}
+
+	function loadKaryawanKesehatan() {
+		var namaSelect = document.getElementById("lap-sehat-nama");
+
+		if (!namaSelect) {
+			return;
+		}
+
+		namaSelect.innerHTML = '<option value="">Memuat karyawan...</option>';
+
+		api("transaksi/karyawan-unit", null, "GET")
+			.then(function (response) {
+				var rows = response.karyawan || [];
+
+				namaSelect.innerHTML = '<option value="">-- Pilih Karyawan --</option>';
+
+				rows.forEach(function (item) {
+					var option = document.createElement("option");
+					option.value = item.nama_lengkap;
+					option.textContent = item.nama_lengkap;
+					namaSelect.appendChild(option);
+				});
+
+				if (!rows.length) {
+					namaSelect.innerHTML =
+						'<option value="">Tidak ada karyawan di unit ini</option>';
+				}
+			})
+			.catch(function (error) {
+				namaSelect.innerHTML = '<option value="">Gagal memuat karyawan</option>';
+				toast(error.message);
 			});
 	}
 

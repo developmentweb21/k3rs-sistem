@@ -5,7 +5,7 @@
             <div class="sidebar-brand">
                 <span class="sidebar-logo"><i class="fa-solid fa-shield-halved"></i></span>
                 <div>
-                    <h2>K3RS Portal</h2>
+                    <h2>SIRAMA</h2>
                     <p>Sistem Pelaporan RS</p>
                 </div>
             </div>
@@ -17,7 +17,12 @@
             <p class="sidebar-label">MENU UTAMA</p>
             <nav class="sidebar-nav" id="nav-menu" aria-label="Navigasi utama"></nav>
         </div>
-        <div class="sidebar-footer"><button id="logout" class="logout-button"><i class="fa-solid fa-right-from-bracket"></i> Keluar dari sistem</button></div>
+        <div class="sidebar-footer">
+            <button id="logout" class="logout-button"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
+            <div>
+                <p class="app-credit">@2026 SIRAMA by saleh mahmud</p>
+            </div>
+        </div>
     </aside>
     <button id="sidebar-toggle" class="sidebar-toggle" type="button" title="Tampilkan/sembunyikan sidebar" aria-label="Tampilkan atau sembunyikan sidebar">
         <i class="fa-solid fa-bars"></i>
