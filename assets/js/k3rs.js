@@ -1150,7 +1150,9 @@
 			})
 			.join("");
 	}
-	function loadRoles() {
+
+	//YANG LAMA
+	/* function loadRoles() {
 		return api("master/roles", null, "GET")
 			.then(function (response) {
 				roleRows = response.roles;
@@ -1220,7 +1222,100 @@
 			.catch(function (error) {
 				toast(error.message);
 			});
+	} */
+
+	function loadRoles() {
+		return api("master/roles", null, "GET")
+			.then(function (response) {
+				roleRows = response.roles || [];
+
+				// Dropdown Role Pegawai
+				var pegawaiRole = document.getElementById("pegawai-role");
+
+				if (pegawaiRole) {
+					pegawaiRole.innerHTML =
+						'<option value="">-- Pilih Peran --</option>' +
+						roleRows
+							.map(function (role) {
+								return (
+									'<option value="' +
+									escapeHtml(role.kode) +
+									'">' +
+									escapeHtml(role.nama) +
+									"</option>"
+								);
+							})
+							.join("");
+				}
+
+				// Tabel Master Role
+				var tableRole = document.getElementById("table-role");
+
+				if (tableRole) {
+					tableRole.innerHTML =
+						roleRows
+							.map(function (role) {
+								return (
+									'<tr class="border-b">' +
+									'<td class="p-4">' +
+									escapeHtml(role.nama) +
+									"</td>" +
+									"<td>" +
+									escapeHtml(role.kode) +
+									"</td>" +
+									'<td class="p-4 text-center">' +
+									'<button class="text-blue-600 mr-3" ' +
+									'data-edit-role="' +
+									role.id +
+									'">' +
+									'<i class="fa-solid fa-pen"></i> Edit' +
+									"</button>" +
+									'<button class="text-red-600" ' +
+									'data-delete-role="' +
+									role.id +
+									'">' +
+									'<i class="fa-solid fa-trash"></i> Hapus' +
+									"</button>" +
+									"</td>" +
+									"</tr>"
+								);
+							})
+							.join("") ||
+						'<tr><td colspan="3" class="p-4 text-gray-500">' +
+							"Belum ada data peran." +
+							"</td></tr>";
+				}
+
+				// Event Edit Role
+				document
+					.querySelectorAll("[data-edit-role]")
+					.forEach(function (button) {
+						button.addEventListener("click", function () {
+							var role = roleRows.filter(function (item) {
+								return String(item.id) === String(button.dataset.editRole);
+							})[0];
+
+							showRoleForm(role);
+						});
+					});
+
+				// Event Hapus Role
+				document
+					.querySelectorAll("[data-delete-role]")
+					.forEach(function (button) {
+						button.addEventListener("click", function () {
+							deleteRole(button.dataset.deleteRole);
+						});
+					});
+
+				return roleRows;
+			})
+			.catch(function (error) {
+				toast(error.message);
+				throw error;
+			});
 	}
+
 	function loadIncidentHistory() {
 		return api("laporan/riwayat", null, "GET")
 			.then(function (response) {
@@ -1725,9 +1820,9 @@
 								"</td><td>" +
 								escapeHtml(menu.slug) +
 								"</td><td>" +
-								menu.roles
+								(menu.roles || [])
 									.map(function (role) {
-										return role === "admin" ? "Admin" : "Petugas";
+										return escapeHtml(getRoleName(role));
 									})
 									.join(", ") +
 								"</td><td>" +
