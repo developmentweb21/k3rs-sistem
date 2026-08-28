@@ -55,6 +55,7 @@
 		document.getElementById("sidebar-user-role").textContent =
 			data.user.role || "-";
 		loadNavigation();
+		initChecklistPeriod();
 		document.getElementById("lap-kategori").innerHTML = options(data.kategori);
 		document.getElementById("check-unit").innerHTML = options(data.unit);
 		document.getElementById("pegawai-unit").innerHTML = options(data.unit);
@@ -90,7 +91,7 @@
 					'name="checklist-' +
 					checklistId +
 					'" ' +
-					'value="no">' +
+					'value="no" checked>' +
 					'<span class="text-red-600 font-medium">' +
 					'<i class="fa-solid fa-circle-xmark mr-1"></i> Tidak' +
 					"</span>" +
@@ -1621,7 +1622,25 @@
 			view("riwayat-checklist");
 		});
 	}
+	function initChecklistPeriod() {
+		var periode = document.getElementById("check-periode");
 
+		if (!periode) {
+			return;
+		}
+
+		// Default periode bulan berjalan
+		if (!periode.value) {
+			periode.value = new Date().toISOString().slice(0, 7);
+		}
+
+		// Paksa month picker muncul pada browser yang mendukung showPicker()
+		periode.addEventListener("click", function () {
+			if (typeof periode.showPicker === "function") {
+				periode.showPicker();
+			}
+		});
+	}
 	function showEmployeeForm(user) {
 		document.getElementById("pegawai-form").reset();
 

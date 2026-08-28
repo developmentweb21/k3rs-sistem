@@ -56,7 +56,8 @@
                     </label>
                     <input
                         type="month"
-                        class="input"
+                        id="check-periode"
+                        class="input w-full"
                         required>
                 </div>
 
