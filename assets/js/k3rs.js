@@ -61,9 +61,8 @@
 		document.getElementById("sidebar-user-name").textContent = data.user.nama;
 		document.getElementById("sidebar-user-role").textContent =
 			data.user.role || "-";
-		loadAppSettings().then(function () {
-			loadNavigation();
-		});
+		loadAppSettings();
+		loadNavigation();
 
 		initChecklistPeriod();
 		document.getElementById("lap-kategori").innerHTML = options(data.kategori);
