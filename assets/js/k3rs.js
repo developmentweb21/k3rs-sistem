@@ -236,7 +236,9 @@
 	}
 	function logoutCurrentUser() {
 		api("logout").finally(function () {
-			window.location.assign(window.K3RS_HOME_URL.replace("dashboard", "login"));
+			window.location.assign(
+				window.K3RS_HOME_URL.replace("dashboard", "login"),
+			);
 		});
 	}
 	function setMobileSidebar(isOpen) {
@@ -248,7 +250,9 @@
 	}
 	function toggleSidebar() {
 		if (window.matchMedia("(max-width: 768px)").matches) {
-			setMobileSidebar(!document.body.classList.contains("mobile-sidebar-open"));
+			setMobileSidebar(
+				!document.body.classList.contains("mobile-sidebar-open"),
+			);
 			return;
 		}
 		document.body.classList.toggle("sidebar-hidden");
@@ -270,7 +274,10 @@
 
 		if (bottomNav) {
 			bottomNav.addEventListener("click", function (event) {
-				var target = event.target.nodeType === 1 ? event.target : event.target.parentElement;
+				var target =
+					event.target.nodeType === 1
+						? event.target
+						: event.target.parentElement;
 				var action = target ? target.closest("[data-bottom-action]") : null;
 				if (!action) return;
 
@@ -520,8 +527,35 @@
 				document.getElementById("detail-verifikasi-tindakan").textContent =
 					report.tindakan_awal || "-";
 
-				document.getElementById("detail-verifikasi-status").textContent =
-					report.status || "-";
+				var statusBadge = document.getElementById("detail-verifikasi-status");
+				var statusInfo = document.getElementById(
+					"detail-verifikasi-status-info",
+				);
+				var statusText = report.status || "-";
+
+				if (statusBadge) {
+					statusBadge.textContent = statusText;
+					statusBadge.className =
+						"badge " +
+						(statusText === "menunggu"
+							? "bg-yellow-100 text-yellow-700"
+							: statusText === "diproses"
+								? "bg-blue-100 text-blue-700"
+								: statusText === "selesai"
+									? "bg-green-100 text-green-700"
+									: "bg-gray-100 text-gray-700");
+				}
+
+				if (statusInfo) {
+					statusInfo.textContent =
+						statusText === "menunggu"
+							? "Laporan ini masih menunggu proses verifikasi."
+							: statusText === "diproses"
+								? "Laporan sedang dalam proses tindak lanjut."
+								: statusText === "selesai"
+									? "Laporan telah selesai dan tidak memerlukan tindakan lanjutan."
+									: "-";
+				}
 
 				renderTindakLanjut(tindakLanjut);
 				// Atur tombol berdasarkan status laporan
@@ -1192,7 +1226,8 @@
 				}
 			})
 			.catch(function (error) {
-				namaSelect.innerHTML = '<option value="">Gagal memuat karyawan</option>';
+				namaSelect.innerHTML =
+					'<option value="">Gagal memuat karyawan</option>';
 				toast(error.message);
 			});
 	}
@@ -1567,7 +1602,7 @@
 					table.innerHTML =
 						"<tr>" +
 						'<td colspan="6" ' +
-						'class="text-center text-gray-400 p-6">' +
+						'class="p-4 text-gray-500">' +
 						"Belum ada riwayat checklist." +
 						"</td>" +
 						"</tr>";
@@ -1581,33 +1616,30 @@
 							Number(item.total_item) - Number(item.jumlah_sesuai);
 
 						return (
-							'<tr class="border-b hover:bg-gray-50">' +
-							'<td class="p-3">' +
-							escapeHtml(item.tanggal_pengisian) +
+							'<tr class="border-b border-gray-100 hover:bg-gray-50">' +
+							'<td class="p-4">' +
+							escapeHtml(item.tanggal_pengisian || "-") +
 							"</td>" +
-							'<td class="p-3">' +
-							escapeHtml(item.periode) +
+							'<td class="p-4">' +
+							escapeHtml(item.periode || "-") +
 							"</td>" +
-							'<td class="p-3">' +
-							escapeHtml(item.unit_kerja) +
+							'<td class="p-4">' +
+							escapeHtml(item.unit_kerja || "-") +
 							"</td>" +
-							'<td class="p-3 text-center">' +
-							'<span class="inline-flex px-2 py-1 ' +
-							'rounded bg-green-100 text-green-700">' +
+							'<td class="p-4 text-center">' +
+							'<span class="inline-flex items-center justify-center min-w-[2.2rem] px-2 py-1 rounded-full bg-green-100 text-green-700 font-medium">' +
 							item.jumlah_sesuai +
 							"</span>" +
 							"</td>" +
-							'<td class="p-3 text-center">' +
-							'<span class="inline-flex px-2 py-1 ' +
-							'rounded bg-red-100 text-red-700">' +
+							'<td class="p-4 text-center">' +
+							'<span class="inline-flex items-center justify-center min-w-[2.2rem] px-2 py-1 rounded-full bg-red-100 text-red-700 font-medium">' +
 							jumlahTidakSesuai +
 							"</span>" +
 							"</td>" +
-							'<td class="p-3 text-center">' +
+							'<td class="p-4 text-center">' +
 							"<button " +
 							'type="button" ' +
-							'class="px-3 py-1.5 rounded-lg ' +
-							'bg-blue-600 text-white hover:bg-blue-700" ' +
+							'class="px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium" ' +
 							'data-checklist-detail="' +
 							item.id +
 							'">' +

@@ -365,13 +365,6 @@
             </p>
         </div>
 
-        <div>
-            <span
-                id="detail-verifikasi-status"
-                class="badge bg-yellow-100 text-yellow-700">
-                Menunggu
-            </span>
-        </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -556,10 +549,17 @@
                     Status Laporan
                 </h3>
 
+                <div class="mb-3">
+                    <span
+                        id="detail-verifikasi-status"
+                        class="badge bg-yellow-100 text-yellow-700">
+                        Menunggu
+                    </span>
+                </div>
+
                 <p
                     id="detail-verifikasi-status-info"
                     class="text-sm text-gray-500 mb-3">
-                    -
                 </p>
 
                 <div class="border-t pt-4 text-sm">

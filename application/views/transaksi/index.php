@@ -116,57 +116,42 @@
         </form>
     </div>
 </section>
-<section data-view="riwayat-checklist" class="hidden max-w-5xl mx-auto">
-    <div class="glass p-6 rounded-xl">
+<section data-view="riwayat-checklist" class="hidden">
+    <h2 class="text-2xl font-bold mb-6">Riwayat Checklist K3</h2>
+    <div class="glass overflow-x-auto rounded-xl">
+        <table class="w-full text-left">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="p-4">Tanggal</th>
+                    <th class="p-4">Periode</th>
+                    <th class="p-4">Unit Kerja</th>
+                    <th class="p-4 text-center">Sesuai</th>
+                    <th class="p-4 text-center">Tidak Sesuai</th>
+                    <th class="p-4 text-center">Aksi</th>
+                </tr>
+            </thead>
 
-        <div class="flex items-center justify-between mb-6">
-            <div>
-                <h2 class="text-2xl font-bold">
-                    Riwayat Checklist K3
-                </h2>
-                <p class="text-sm text-gray-500">
-                    Daftar checklist K3 yang telah dikirim.
-                </p>
-            </div>
-
-            <button
-                type="button"
-                class="button bg-teal-600"
-                onclick="view('checklist')">
-                <i class="fa-solid fa-plus mr-2"></i>
-                Buat Checklist
-            </button>
-        </div>
-
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="text-left p-3">Tanggal</th>
-                        <th class="text-left p-3">Periode</th>
-                        <th class="text-left p-3">Unit Kerja</th>
-                        <th class="text-center p-3">Sesuai</th>
-                        <th class="text-center p-3">Tidak Sesuai</th>
-                        <th class="text-center p-3">Aksi</th>
-                    </tr>
-                </thead>
-
-                <tbody id="table-riwayat-checklist">
-                    <tr>
-                        <td colspan="6" class="text-center text-gray-400 p-6">
-                            Memuat riwayat checklist...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
+            <tbody id="table-riwayat-checklist">
+                <tr>
+                    <td colspan="6" class="p-4 text-gray-500">
+                        Memuat riwayat checklist...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </section>
-<section data-view="detail-checklist" class="hidden max-w-4xl mx-auto">
+<section data-view="detail-checklist" class="hidden">
     <div class="glass p-6 rounded-xl">
+        <button
+            type="button"
+            id="btn-kembali-riwayat-checklist"
+            class="text-blue-600 hover:text-blue-800 mb-2">
+            <i class="fa-solid fa-arrow-left"></i>
+            Kembali
+        </button>
 
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center justify-between mb-12">
             <div>
                 <h2 class="text-2xl font-bold">
                     Detail Checklist K3
@@ -175,14 +160,6 @@
                     Hasil pemeriksaan checklist K3.
                 </p>
             </div>
-
-            <button
-                type="button"
-                class="button bg-gray-600"
-                id="btn-kembali-riwayat-checklist">
-                <i class="fa-solid fa-arrow-left mr-2"></i>
-                Kembali
-            </button>
         </div>
 
         <!-- Informasi laporan -->
