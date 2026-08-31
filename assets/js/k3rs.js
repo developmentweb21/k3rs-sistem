@@ -61,8 +61,10 @@
 		document.getElementById("sidebar-user-name").textContent = data.user.nama;
 		document.getElementById("sidebar-user-role").textContent =
 			data.user.role || "-";
-		applyAppSettings();
-		loadNavigation();
+		loadAppSettings().then(function () {
+			loadNavigation();
+		});
+
 		initChecklistPeriod();
 		document.getElementById("lap-kategori").innerHTML = options(data.kategori);
 		document.getElementById("check-unit").innerHTML = options(data.unit);
@@ -293,24 +295,45 @@
 			});
 		}
 	}
-	var APP_SETTINGS_KEY = "k3rs_app_settings";
+	var appSettings = null;
 
 	function getAppSettings() {
-		var defaults = {
-			app_name: "SIRAMA",
-			alamat: "",
-			logo: "",
-			icon: "fa-shield-halved",
-			header_text: "Sistem Pelaporan RS",
-			footer_text: "@2026 SIRAMA by saleh mahmud",
-		};
+		return (
+			appSettings || {
+				app_name: "SIRAMA",
+				alamat: "",
+				logo: "",
+				icon: "fa-shield-halved",
+				header_text: "Sistem Pelaporan RS",
+				footer_text: "@2026 SIRAMA by saleh mahmud",
+			}
+		);
+	}
+	function loadAppSettings() {
+		return api("master/settings", null, "GET")
+			.then(function (response) {
+				appSettings = response.settings || {};
 
-		try {
-			var saved = JSON.parse(localStorage.getItem(APP_SETTINGS_KEY) || "{}");
-			return Object.assign({}, defaults, saved);
-		} catch (error) {
-			return defaults;
-		}
+				applyAppSettings();
+
+				return appSettings;
+			})
+			.catch(function (error) {
+				console.error("Gagal memuat pengaturan aplikasi:", error);
+
+				appSettings = {
+					app_name: "SIRAMA",
+					alamat: "",
+					logo: "",
+					icon: "fa-shield-halved",
+					header_text: "Sistem Pelaporan RS",
+					footer_text: "@2026 SIRAMA by saleh mahmud",
+				};
+
+				applyAppSettings();
+
+				return appSettings;
+			});
 	}
 
 	function applyAppSettings() {
@@ -375,14 +398,15 @@
 	}
 
 	function saveAppSettings(settings) {
-		localStorage.setItem(APP_SETTINGS_KEY, JSON.stringify(settings));
 		api("master/settings", settings, "POST")
 			.then(function (response) {
+				appSettings = Object.assign({}, appSettings || {}, settings);
+
 				applyAppSettings();
+
 				toast(response.message || "Pengaturan aplikasi berhasil disimpan.");
 			})
 			.catch(function (error) {
-				applyAppSettings();
 				toast(error.message || "Gagal menyimpan pengaturan.");
 			});
 	}

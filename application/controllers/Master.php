@@ -1,5 +1,5 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 class Master extends CI_Controller
 {
@@ -92,9 +92,18 @@ class Master extends CI_Controller
     private function require_admin()
     {
         $user = $this->session->userdata('k3rs_user');
-        if (!$user || $user['role'] !== 'admin') { $this->json(array('message' => 'Akses ini hanya untuk administrator.'), 403); return NULL; }
+        if (!$user || $user['role'] !== 'admin') {
+            $this->json(array('message' => 'Akses ini hanya untuk administrator.'), 403);
+            return NULL;
+        }
         return $user;
     }
-    private function payload() { return json_decode($this->input->raw_input_stream, TRUE) ?: array(); }
-    private function json($data, $status = 200) { return $this->output->set_status_header($status)->set_content_type('application/json')->set_output(json_encode($data)); }
+    private function payload()
+    {
+        return json_decode($this->input->raw_input_stream, TRUE) ?: array();
+    }
+    private function json($data, $status = 200)
+    {
+        return $this->output->set_status_header($status)->set_content_type('application/json')->set_output(json_encode($data));
+    }
 }
