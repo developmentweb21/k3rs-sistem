@@ -1,26 +1,16 @@
 <section data-view="dashboard">
 
-    <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
+    <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
         <div>
-            <h2 class="text-2xl font-bold">Dashboard K3RS</h2>
+            <h2 class="text-2xl font-bold">Dashboard Monitoring K3RS</h2>
             <p class="text-sm text-gray-500">
                 Monitoring laporan Insiden, Kesehatan, dan Checklist K3.
             </p>
         </div>
-
-        <button
-            type="button"
-            id="btn-refresh-dashboard"
-            class="button bg-blue-600">
-            <i class="fa-solid fa-rotate-right mr-2"></i>
-            Refresh
-        </button>
     </div>
-
-
     <!-- FILTER -->
     <div class="glass p-5 rounded-xl mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
 
             <div>
                 <label class="block text-sm font-medium mb-2">
@@ -50,10 +40,17 @@
                     type="button"
                     id="btn-filter-dashboard"
                     class="button bg-teal-600 w-full">
-                    <i class="fa-solid fa-filter mr-2"></i>
+                    <i class="fa-solid fa-filter"></i>
                     Terapkan Filter
                 </button>
             </div>
+            <div><button
+                    type="button"
+                    id="btn-refresh-dashboard"
+                    class="button bg-blue-600">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    Refresh
+                </button></div>
 
         </div>
     </div>

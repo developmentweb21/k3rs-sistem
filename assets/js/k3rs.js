@@ -61,6 +61,7 @@
 		document.getElementById("sidebar-user-name").textContent = data.user.nama;
 		document.getElementById("sidebar-user-role").textContent =
 			data.user.role || "-";
+		applyAppSettings();
 		loadNavigation();
 		initChecklistPeriod();
 		document.getElementById("lap-kategori").innerHTML = options(data.kategori);
@@ -292,6 +293,100 @@
 			});
 		}
 	}
+	var APP_SETTINGS_KEY = "k3rs_app_settings";
+
+	function getAppSettings() {
+		var defaults = {
+			app_name: "SIRAMA",
+			alamat: "",
+			logo: "",
+			icon: "fa-shield-halved",
+			header_text: "Sistem Pelaporan RS",
+			footer_text: "@2026 SIRAMA by saleh mahmud",
+		};
+
+		try {
+			var saved = JSON.parse(localStorage.getItem(APP_SETTINGS_KEY) || "{}");
+			return Object.assign({}, defaults, saved);
+		} catch (error) {
+			return defaults;
+		}
+	}
+
+	function applyAppSettings() {
+		var settings = getAppSettings();
+
+		var brandName = document.querySelector(".sidebar-brand h2");
+		if (brandName) {
+			brandName.textContent = settings.app_name || "SIRAMA";
+		}
+
+		var brandText = document.querySelector(".sidebar-brand p");
+		if (brandText) {
+			brandText.textContent =
+				settings.header_text || settings.app_name || "Sistem Pelaporan RS";
+		}
+
+		var logoTarget = document.querySelector(".sidebar-logo");
+		if (logoTarget) {
+			if (settings.logo) {
+				logoTarget.innerHTML =
+					'<img src="' +
+					settings.logo +
+					'" alt="Logo aplikasi" class="w-8 h-8 rounded-md object-cover">';
+			} else if (settings.icon) {
+				logoTarget.innerHTML =
+					'<i class="fa-solid ' + escapeHtml(settings.icon) + '"></i>';
+			} else {
+				logoTarget.innerHTML = '<i class="fa-solid fa-shield-halved"></i>';
+			}
+		}
+
+		var credit = document.querySelector(".app-credit");
+		if (credit) {
+			credit.textContent =
+				settings.footer_text || "@2026 SIRAMA by saleh mahmud";
+		}
+
+		var form = document.getElementById("setting-form");
+		if (!form) {
+			return;
+		}
+
+		document.getElementById("setting-app-name").value = settings.app_name || "";
+		document.getElementById("setting-alamat").value = settings.alamat || "";
+		document.getElementById("setting-icon").value =
+			settings.icon || "fa-shield-halved";
+		document.getElementById("setting-header-text").value =
+			settings.header_text || "";
+		document.getElementById("setting-footer-text").value =
+			settings.footer_text || "";
+
+		var preview = document.getElementById("setting-logo-preview");
+		var placeholder = document.getElementById("setting-logo-placeholder");
+		if (preview && settings.logo) {
+			preview.src = settings.logo;
+			preview.classList.remove("hidden");
+			if (placeholder) placeholder.classList.add("hidden");
+		} else if (preview) {
+			preview.classList.add("hidden");
+			if (placeholder) placeholder.classList.remove("hidden");
+		}
+	}
+
+	function saveAppSettings(settings) {
+		localStorage.setItem(APP_SETTINGS_KEY, JSON.stringify(settings));
+		api("master/settings", settings, "POST")
+			.then(function (response) {
+				applyAppSettings();
+				toast(response.message || "Pengaturan aplikasi berhasil disimpan.");
+			})
+			.catch(function (error) {
+				applyAppSettings();
+				toast(error.message || "Gagal menyimpan pengaturan.");
+			});
+	}
+
 	function loadNavigation() {
 		api("master/menu/navigasi", null, "GET")
 			.then(function (response) {
@@ -366,6 +461,14 @@
 					}
 				});
 
+				if (data.user && data.user.role === "admin") {
+					html +=
+						'<button data-menu="setting" ' +
+						'class="menu-button w-full text-left px-3 py-2 rounded hover:bg-blue-800">' +
+						'<i class="fa-solid fa-gear w-6"></i>Pengaturan' +
+						"</button>";
+				}
+
 				document.getElementById("nav-menu").innerHTML = html;
 				document.getElementById("bottom-nav").innerHTML =
 					'<button type="button" class="bottom-action" data-menu="dashboard">' +
@@ -374,6 +477,11 @@
 					'<button type="button" class="bottom-action" data-bottom-action="menu">' +
 					'<i class="fa-solid fa-bars"></i><span>Menu</span>' +
 					"</button>" +
+					(data.user && data.user.role === "admin"
+						? '<button type="button" class="bottom-action" data-menu="setting">' +
+							'<i class="fa-solid fa-gear"></i><span>Setting</span>' +
+							"</button>"
+						: "") +
 					'<button type="button" class="bottom-action logout" data-bottom-action="logout">' +
 					'<i class="fa-solid fa-right-from-bracket"></i><span>Keluar</span>' +
 					"</button>";
@@ -2266,6 +2374,80 @@
 				toast(error.message);
 			});
 	}
+	function setupSettingForm() {
+		var form = document.getElementById("setting-form");
+		if (!form) {
+			return;
+		}
+
+		api("master/settings", null, "GET")
+			.then(function (response) {
+				var settings = response.settings || getAppSettings();
+				localStorage.setItem(APP_SETTINGS_KEY, JSON.stringify(settings));
+				applyAppSettings();
+			})
+			.catch(function () {
+				applyAppSettings();
+			});
+
+		form.addEventListener("submit", function (event) {
+			event.preventDefault();
+			var settings = getAppSettings();
+			var fileInput = document.getElementById("setting-logo-file");
+			var file = fileInput && fileInput.files ? fileInput.files[0] : null;
+
+			settings.app_name =
+				document.getElementById("setting-app-name").value.trim() || "SIRAMA";
+			settings.alamat = document.getElementById("setting-alamat").value.trim();
+			settings.icon =
+				document.getElementById("setting-icon").value.trim() ||
+				"fa-shield-halved";
+			settings.header_text =
+				document.getElementById("setting-header-text").value.trim() ||
+				"Sistem Pelaporan RS";
+			settings.footer_text =
+				document.getElementById("setting-footer-text").value.trim() ||
+				"@2026 SIRAMA by saleh mahmud";
+
+			if (file) {
+				var reader = new FileReader();
+				reader.onload = function () {
+					settings.logo = reader.result;
+					saveAppSettings(settings);
+				};
+				reader.readAsDataURL(file);
+				return;
+			}
+
+			saveAppSettings(settings);
+		});
+
+		var logoInput = document.getElementById("setting-logo-file");
+		if (logoInput) {
+			logoInput.addEventListener("change", function () {
+				var file = this.files && this.files[0] ? this.files[0] : null;
+				var preview = document.getElementById("setting-logo-preview");
+				var placeholder = document.getElementById("setting-logo-placeholder");
+
+				if (!file || !preview) {
+					return;
+				}
+
+				var reader = new FileReader();
+				reader.onload = function () {
+					preview.src = reader.result;
+					preview.classList.remove("hidden");
+					if (placeholder) placeholder.classList.add("hidden");
+				};
+				reader.readAsDataURL(file);
+			});
+		}
+	}
+
+	function loadAppSettings() {
+		applyAppSettings();
+	}
+
 	function setupRoleCrud() {
 		document
 			.getElementById("btn-tambah-role")
@@ -2328,6 +2510,7 @@
 	setupMasterCrud();
 	setupMenuCrud();
 	setupRoleCrud();
+	setupSettingForm();
 	setupResponsiveSidebar();
 
 	render();

@@ -32,6 +32,7 @@
         <?php $this->load->view('transaksi/index'); ?>
 
         <?php $this->load->view('master/index'); ?>
+        <?php $this->load->view('master/setting'); ?>
         <?php $this->load->view('master/menu'); ?>
         <?php $this->load->view('master/roles'); ?>
     </main>

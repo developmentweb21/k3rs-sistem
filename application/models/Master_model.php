@@ -50,6 +50,51 @@ class Master_model extends CI_Model
             ->where('menu_roles.role', $role)->where('menus.is_active', 1)
             ->order_by('menus.urutan')->get()->result_array();
     }
+    public function get_app_settings()
+    {
+        $settings = $this->db->get('app_settings')->row_array();
+        if (!$settings) {
+            $this->db->insert('app_settings', array(
+                'app_name' => 'SIRAMA',
+                'alamat' => '',
+                'icon' => 'fa-shield-halved',
+                'header_text' => 'Sistem Pelaporan RS',
+                'footer_text' => '@2026 SIRAMA by saleh mahmud'
+            ));
+            $settings = $this->db->get('app_settings')->row_array();
+        }
+        return $settings ?: array(
+            'app_name' => 'SIRAMA',
+            'alamat' => '',
+            'logo' => '',
+            'icon' => 'fa-shield-halved',
+            'header_text' => 'Sistem Pelaporan RS',
+            'footer_text' => '@2026 SIRAMA by saleh mahmud'
+        );
+    }
+    public function save_app_settings($data)
+    {
+        $settings = $this->get_app_settings();
+        $payload = array(
+            'app_name' => trim((string) ($data['app_name'] ?? $settings['app_name'] ?? 'SIRAMA')),
+            'alamat' => trim((string) ($data['alamat'] ?? $settings['alamat'] ?? '')),
+            'logo' => isset($data['logo']) ? $data['logo'] : ($settings['logo'] ?? ''),
+            'icon' => trim((string) ($data['icon'] ?? $settings['icon'] ?? 'fa-shield-halved')),
+            'header_text' => trim((string) ($data['header_text'] ?? $settings['header_text'] ?? 'Sistem Pelaporan RS')),
+            'footer_text' => trim((string) ($data['footer_text'] ?? $settings['footer_text'] ?? '@2026 SIRAMA by saleh mahmud')),
+        );
+
+        if ($payload['app_name'] === '') $payload['app_name'] = 'SIRAMA';
+        if ($payload['icon'] === '') $payload['icon'] = 'fa-shield-halved';
+
+        if (empty($settings)) {
+            $this->db->insert('app_settings', $payload);
+            return array('success' => TRUE, 'message' => 'Pengaturan aplikasi berhasil disimpan.');
+        }
+
+        $this->db->where('id', (int) $settings['id'])->update('app_settings', $payload);
+        return array('success' => TRUE, 'message' => 'Pengaturan aplikasi berhasil disimpan.');
+    }
     public function role_has_menu_access($role, $slug)
     {
         if (empty($role) || empty($slug)) {

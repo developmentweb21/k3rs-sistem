@@ -60,6 +60,7 @@ $route['api/master/users/delete/(:num)'] = 'master/hapus_user/$1';
 $route['api/master/menu/navigasi'] = 'master/navigasi';
 $route['api/master/menu'] = 'master/menu';
 $route['api/master/menu/delete/(:num)'] = 'master/hapus_menu/$1';
+$route['api/master/settings'] = 'master/settings';
 $route['api/master/roles'] = 'master/roles';
 $route['api/master/roles/delete/(:num)'] = 'master/hapus_role/$1';
 $route['api/master/(:any)'] = 'master/data/$1';

@@ -66,6 +66,14 @@ class Master extends CI_Controller
         return $this->json(array('message' => $success ? 'Menu berhasil dihapus.' : 'Menu tidak ditemukan.'), $success ? 200 : 404);
     }
 
+    public function settings()
+    {
+        if (!$this->require_admin()) return;
+        if ($this->input->method(TRUE) === 'GET') return $this->json(array('settings' => $this->Master_model->get_app_settings()));
+        $result = $this->Master_model->save_app_settings($this->payload());
+        return $this->json($result, $result['success'] ? 200 : 422);
+    }
+
     public function roles()
     {
         if (!$this->require_admin()) return;
